@@ -10,6 +10,7 @@ import adminHome from "../admin/adminHome";
 import adminProfile from "../admin/adminProfile";
 import CategoriesManagement from "../admin/categoriesManagement";
 import addNewEvents from "../adminComponents/addNewEvents";
+import AllTickets from "../admin/AllTickets";
 
 let router = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ let router = createBrowserRouter([
       {
         path: "/admin/addNewEvents",
         Component: addNewEvents,
+      },
+      {
+        path: "/admin/alltickets",
+        Component: AllTickets,
       },
     ],
   },
