@@ -102,6 +102,7 @@ function adminHome() {
         priorityDate: ticket.priority_date || "—",
         price: ticket.fst_pt || "—",
         status: ticket.status || "pending",
+        refundStatus: ticket.refund_status || "none",
       });
     });
 
@@ -133,8 +134,6 @@ function adminHome() {
 
   return (
     <div className="space-y-6">
-      
-
       <div className="bg-white shadow-sm">
         <div className="relative flex items-end gap-6 sm:gap-12 mb-4 sm:mb-8 px-4 sm:px-8 pt-8">
           {["tickets", "customers", "events"].map((tab) => (
@@ -164,9 +163,7 @@ function adminHome() {
         <div className="border-b border-gray-200" />
       </div>
 
-      
       {activeTab === "tickets" && <AllTickets />}
-
 
       {activeTab === "customers" && (
         <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -376,6 +373,15 @@ function adminHome() {
                                 <td className="px-4 py-3 text-right">
                                   <span className={statusChip(r.status)}>
                                     {r.status}
+                                    {r.status?.toLowerCase() === "cancel" &&
+                                    r.refundStatus &&
+                                    r.refundStatus !== "none"
+                                      ? ` (${r.refundStatus
+                                          .replace("_", " ")
+                                          .replace(/\b\w/g, (l) =>
+                                            l.toUpperCase()
+                                          )})`
+                                      : ""}
                                   </span>
                                 </td>
                               </tr>

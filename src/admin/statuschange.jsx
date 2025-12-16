@@ -173,6 +173,11 @@ function StatusChange() {
     loadTickets();
   };
 
+  const changeRefundStatus = async (ticketId, status) => {
+    await patchTicket(ticketId, { refund_status: status });
+    loadTickets();
+  };
+
   const filteredTickets = tickets.filter((t) =>
     activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab
   );
@@ -265,17 +270,23 @@ function StatusChange() {
                             )}`}
                           >
                             {STATUS_DISPLAY[(t.status || "").toLowerCase()]}
+                            {t.status?.toLowerCase() === "cancel" &&
+                            t.refund_status &&
+                            t.refund_status !== "none"
+                              ? ` (${t.refund_status
+                                  .replace("_", " ")
+                                  .replace(/\b\w/g, (l) => l.toUpperCase())})`
+                              : ""}
                           </span>
                         </td>
                         <td className="px-3 py-2 space-x-2">
                           {(t.status || "").toLowerCase() === "pending" && (
                             <button
-  onClick={() => openPaidModal(t)}
-  className="px-3 py-1 rounded border border-black text-black bg-transparent"
->
-  Mark Paid
-</button>
-
+                              onClick={() => openPaidModal(t)}
+                              className="px-3 py-1 rounded border border-black text-black bg-transparent"
+                            >
+                              Mark Paid
+                            </button>
                           )}
 
                           {(t.status || "").toLowerCase() === "paid" && (
@@ -319,12 +330,26 @@ function StatusChange() {
                           )}
 
                           {(t.status || "").toLowerCase() === "cancel" && (
-                            <button
-                              onClick={() => openConfirmPending(t)}
-                              className="px-3 py-1 rounded border border-black"
+                            <select
+                              className="border rounded px-2 py-1"
+                              defaultValue=""
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                if (v === "pending") openConfirmPending(t);
+                                if (v === "in_process")
+                                  changeRefundStatus(t.id, "in_process");
+                                if (v === "refunded")
+                                  changeRefundStatus(t.id, "refunded");
+                                e.target.value = "";
+                              }}
                             >
-                              Back to Pending
-                            </button>
+                              <option value="" hidden>
+                                Change Status
+                              </option>
+                              <option value="pending">Back to Pending</option>
+                              <option value="in_process">In Process</option>
+                              <option value="refunded">Refunded</option>
+                            </select>
                           )}
                         </td>
                       </tr>
