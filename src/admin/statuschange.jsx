@@ -183,7 +183,7 @@ function StatusChange() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-full mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Ticket Status Management</h1>
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -206,7 +206,7 @@ function StatusChange() {
         <button
           onClick={loadTickets}
           disabled={loading}
-          className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100"
+          className="bg-white px-2 py-1 rounded-md border hover:bg-gray-200"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>
@@ -216,24 +216,41 @@ function StatusChange() {
         <div className="mb-4 p-3 rounded bg-red-50 text-red-700">{error}</div>
       )}
 
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto shadow-sm border border-gray-300 rounded-lg">
+        <table className="bg-white w-full text-sm">
+          <thead className=" border-b border-gray-300">
             <tr>
-              <th className="px-3 py-2">Order ID</th>
-              <th className="px-3 py-2">Passport Name</th>
-              <th className="px-3 py-2">Facebook Name</th>
-              <th className="px-3 py-2">Priority Date</th>
-              <th className="px-3 py-2">1st</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2">Action</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Order ID
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Passport Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Facebook Name
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Priority Date
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                1st
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                Action
+              </th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {filteredTickets.length === 0 && !loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-6 text-gray-500">
+                <td
+                  colSpan={7}
+                  className="px-6 py-8 text-center text-gray-500 text-sm"
+                >
                   No tickets found
                 </td>
               </tr>
@@ -250,20 +267,31 @@ function StatusChange() {
                   .sort((a, b) => Number(b) - Number(a))
                   .flatMap((orderId) =>
                     grouped[orderId].map((t, i) => (
-                      <tr key={t.id} className="border-t hover:bg-gray-50">
+                      <tr
+                        key={t.id}
+                        className="hover:bg-gray-100 transition-colors"
+                      >
                         {i === 0 && (
                           <td
                             rowSpan={grouped[orderId].length}
-                            className="px-3 py-2 font-medium"
+                            className="px-6 py-4 text-sm font-semibold text-gray-900"
                           >
                             {orderId}
                           </td>
                         )}
-                        <td className="px-3 py-2">{t.passport_name || "—"}</td>
-                        <td className="px-3 py-2">{t.facebook_name || "—"}</td>
-                        <td className="px-3 py-2">{t.priority_date || "—"}</td>
-                        <td className="px-3 py-2">{t.fst_pt || "—"}</td>
-                        <td className="px-3 py-2">
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {t.passport_name || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {t.facebook_name || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {t.priority_date || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {t.fst_pt || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
                           <span
                             className={`px-2 py-1 rounded text-xs font-medium ${statusBadgeClass(
                               t.status
@@ -279,7 +307,7 @@ function StatusChange() {
                               : ""}
                           </span>
                         </td>
-                        <td className="px-3 py-2 space-x-2">
+                        <td className="px-6 py-4 text-sm space-x-2">
                           {(t.status || "").toLowerCase() === "pending" && (
                             <button
                               onClick={() => openPaidModal(t)}

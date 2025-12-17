@@ -136,7 +136,7 @@ function adminHome() {
     <div className="space-y-6">
       <div className="bg-white shadow-sm">
         <div className="relative flex items-end gap-6 sm:gap-12 mb-4 sm:mb-8 px-4 sm:px-8 pt-8">
-          {["tickets", "customers", "events"].map((tab) => (
+          {["tickets", "events", "customers"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -165,100 +165,6 @@ function adminHome() {
 
       {activeTab === "tickets" && <AllTickets />}
 
-      {activeTab === "customers" && (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          {loading && (
-            <div className="p-8 text-center text-gray-500">Loading...</div>
-          )}
-          {error && (
-            <div className="p-4 bg-red-50 text-red-700 border border-red-200">
-              {error}
-            </div>
-          )}
-          {!loading && customers.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
-              No customers found
-            </div>
-          )}
-          {!loading && customers.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Photo
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Pending
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                      Paid
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {customers.map((customer) => {
-                    const customerOrders = orders.filter(
-                      (o) => o.customer === customer.id
-                    );
-                    const customerTickets = tickets.filter((t) =>
-                      customerOrders.some((o) => o.id === t.order)
-                    );
-                    const pendingCount = customerTickets.filter(
-                      (t) => (t.status || "").toLowerCase() === "pending"
-                    ).length;
-                    const paidCount = customerTickets.filter(
-                      (t) => (t.status || "").toLowerCase() === "paid"
-                    ).length;
-
-                    return (
-                      <tr
-                        key={customer.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {customer.id}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
-                            {(customer.name || "U")[0].toUpperCase()}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {customer.name || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {customer.email || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            {pendingCount}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {paidCount}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
       {activeTab === "events" && (
         <div className="space-y-8 mt-6">
           {loading && (
@@ -278,10 +184,9 @@ function adminHome() {
             eventsAgg.map((block) => (
               <div
                 key={block.eventId}
-                className="border border-gray-200 rounded-lg overflow-hidden"
+                className=" shadow-sm border border-gray-200 rounded-lg overflow-hidden"
               >
-                {/* Event header */}
-                <div className="bg-gray-50 px-4 py-4 border-b border-gray-200">
+                <div className="bg-white px-4 py-4">
                   <h3 className="font-semibold text-lg text-gray-900">
                     {block.eventName}
                   </h3>
@@ -289,11 +194,9 @@ function adminHome() {
                     {block.eventDate} • {block.eventLocation}
                   </p>
                 </div>
-
-                {/* Table */}
                 <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                  <table className="bg-white min-w-full">
+                    <thead className="border-b border-gray-400">
                       <tr>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
                           Order ID
@@ -337,7 +240,7 @@ function adminHome() {
                             {orderGroup.rows.map((r, ticketIdx) => (
                               <tr
                                 key={`${groupIdx}-${ticketIdx}`}
-                                className="hover:bg-gray-50 transition-colors"
+                                className="hover:bg-gray-100 transition-colors"
                               >
                                 {ticketIdx === 0 && (
                                   <td
@@ -394,6 +297,100 @@ function adminHome() {
                 </div>
               </div>
             ))}
+        </div>
+      )}
+
+      {activeTab === "customers" && (
+        <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+          {loading && (
+            <div className="p-8 text-center text-gray-500">Loading...</div>
+          )}
+          {error && (
+            <div className="p-4 bg-red-50 text-red-700 border border-red-200">
+              {error}
+            </div>
+          )}
+          {!loading && customers.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              No customers found
+            </div>
+          )}
+          {!loading && customers.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className=" border-b border-gray-400">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Photo
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Pending
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                      Paid
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {customers.map((customer) => {
+                    const customerOrders = orders.filter(
+                      (o) => o.customer === customer.id
+                    );
+                    const customerTickets = tickets.filter((t) =>
+                      customerOrders.some((o) => o.id === t.order)
+                    );
+                    const pendingCount = customerTickets.filter(
+                      (t) => (t.status || "").toLowerCase() === "pending"
+                    ).length;
+                    const paidCount = customerTickets.filter(
+                      (t) => (t.status || "").toLowerCase() === "paid"
+                    ).length;
+
+                    return (
+                      <tr
+                        key={customer.id}
+                        className="hover:bg-gray-100 transition-colors"
+                      >
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {customer.id}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
+                            {(customer.name || "U")[0].toUpperCase()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {customer.name || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {customer.email || "—"}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            {pendingCount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {paidCount}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
