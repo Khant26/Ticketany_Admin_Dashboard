@@ -145,28 +145,35 @@ function AllTickets() {
         All Orders and Tickets
       </h1>
 
-      <div className="flex items-center gap-3 mb-4">
-        <select
-          className="bg-white
-  px-2 py-1 border rounded-md
-             focus:outline-none
-             focus:ring-0"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          title="Filter by status"
-        >
-          <option value="all">All</option>
-          <option value="pending">Pending</option>
-          <option value="paid">Paid</option>
-          <option value="complete">Completed</option>
-          <option value="cancel">Cancelled</option>
-        </select>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex gap-2 flex-wrap">
+          {["all", "pending", "paid", "complete", "cancel"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 rounded-md text-sm font-medium border ${
+                filter === status
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              {status === "all"
+                ? "All"
+                : status === "complete"
+                ? "Completed"
+                : status === "cancel"
+                ? "Cancelled"
+                : status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
+
         <button
-          type="button"
-          className="bg-white px-2 py-1 rounded-md border hover:bg-gray-200"
           onClick={loadAll}
+          disabled={loading}
+          className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100"
         >
-          Refresh
+          {loading ? "Refreshing…" : "Refresh"}
         </button>
       </div>
 

@@ -125,7 +125,7 @@ function Sidebar() {
                   d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v9m0-9l-3 3m3-3l3 3"
                 />
               </svg>
-              <span>Upload Banner</span>
+              <span>Banners</span>
             </Link>
 
             <Link

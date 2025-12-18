@@ -1,30 +1,25 @@
 import { useState, useEffect } from "react";
-import AdminBanner from "../adminComponents/adminBanner";
 import axios from "axios";
+import { LuTrash2 } from "react-icons/lu";
 
 function UploadBanner() {
-  
   const [banners, setBanners] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [title, setTitle] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [editingBanner, setEditingBanner] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editImage, setEditImage] = useState(null);
-  const [editPreviewUrl, setEditPreviewUrl] = useState(null);
 
   const fetchBanners = async () => {
     try {
       const res = await axios.get("http://127.0.0.1:8000/api/banners/");
-      const sortedBanners = res.data.sort((a, b) => a.order - b.order);
-      setBanners(sortedBanners);
-      setIsLoading(false);
-    } catch (err) {
-      console.error(err);
+      const sorted = res.data.sort((a, b) => a.order - b.order);
+      setBanners(sorted);
+    } catch {
       setError("Failed to fetch banners");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -33,33 +28,33 @@ function UploadBanner() {
     fetchBanners();
   }, []);
 
-  const toBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = (err) => reject(err);
+      reader.onerror = reject;
     });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedImage) return setError("Please select an image");
     if (!title.trim()) return setError("Please enter a banner title");
+    if (!selectedImage) return setError("Please select an image");
 
     try {
       setIsUploading(true);
-      const base64Image = await toBase64(selectedImage);
-      const payload = { banner_name: title, banner_image: [base64Image] };
-      await axios.post("http://127.0.0.1:8000/api/banners/", payload);
+      const base64 = await toBase64(selectedImage);
+      await axios.post("http://127.0.0.1:8000/api/banners/", {
+        banner_name: title,
+        banner_image: [base64],
+      });
 
+      setTitle("");
       setSelectedImage(null);
       setPreviewUrl(null);
-      setTitle("");
       setError("");
       fetchBanners();
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Failed to upload banner");
     } finally {
       setIsUploading(false);
@@ -67,234 +62,120 @@ function UploadBanner() {
   };
 
   const removeBanner = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this banner?")) return;
-    try {
-      await axios.delete(`http://127.0.0.1:8000/api/banners/${id}/`);
-      fetchBanners();
-    } catch {
-      setError("Failed to delete banner");
-    }
-  };
-
-  const moveUp = async (id) => {
-    try {
-      await axios.post(`http://127.0.0.1:8000/api/banners/${id}/move_up/`);
-      fetchBanners(); // refresh from backend
-    } catch {
-      setError("Failed to move banner up");
-    }
-  };
-
-  const moveDown = async (id) => {
-    try {
-      await axios.post(`http://127.0.0.1:8000/api/banners/${id}/move_down/`);
-      fetchBanners(); // refresh from backend
-    } catch {
-      setError("Failed to move banner down");
-    }
-  };
-
-  const startEdit = (banner) => {
-    setEditingBanner(banner);
-    setEditTitle(banner.banner_name);
-    setEditImage(null);
-    setEditPreviewUrl(banner.banner_image[0]);
-  };
-
-  const cancelEdit = () => {
-    setEditingBanner(null);
-    setEditTitle("");
-    setEditImage(null);
-    setEditPreviewUrl(null);
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    if (!editTitle.trim()) return setError("Please enter a banner title");
-
-    try {
-      setIsUploading(true);
-      let payload = { banner_name: editTitle };
-
-      if (editImage) {
-        const base64Image = await toBase64(editImage);
-        payload.banner_image = [base64Image];
-      }
-
-      await axios.put(`http://127.0.0.1:8000/api/banners/${editingBanner.id}/`, payload);
-
-      setError("");
-      cancelEdit();
-      fetchBanners();
-    } catch (err) {
-      console.error(err);
-      setError("Failed to update banner");
-    } finally {
-      setIsUploading(false);
-    }
+    if (!window.confirm("Delete this banner?")) return;
+    await axios.delete(`http://127.0.0.1:8000/api/banners/${id}/`);
+    fetchBanners();
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Upload Form */}
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
-          <h2 className="text-2xl font-bold mb-5 text-gray-800">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-900">
             Upload New Banner
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Banner Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-
-            <div className="w-full">
-              <input
-                id="banner-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setSelectedImage(file);
-                    setPreviewUrl(URL.createObjectURL(file));
-                  }
-                }}
-                className="hidden"
-              />
-
-              <label
-                htmlFor="banner-upload"
-                className="cursor-pointer inline-block bg-[#ee6786] active:bg-[#d45573] hover:opacity-80 hover:scale-105 text-white px-4 py-2 rounded-lg transition-all"
-              >
-                Choose Image
-              </label>
-
-              {selectedImage && (
-                <span className="text-gray-700 font-medium ml-2">
-                  {selectedImage.name}
-                </span>
-              )}
-
-              {previewUrl && (
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="h-48 w-full object-contain rounded-md border border-gray-200 mt-2"
-                />
-              )}
-            </div>
-
-            {error && <div className="text-red-500 font-medium">{error}</div>}
-
-            <button
-              type="submit"
-              disabled={isUploading}
-              className={`w-full py-2 rounded-lg font-semibold text-white cursor-pointer transition-all ${
-                isUploading
-                  ? "bg-[#ee6786] active:bg-[#d45573] hover:opacity-80 hover:scale-105 cursor-not-allowed"
-                  : "bg-[#ee6786] active:bg-[#d45573] hover:opacity-80 hover:scale-105"
-              }`}
-            >
-              {isUploading ? "Uploading..." : "Upload Banner"}
-            </button>
-          </form>
-        </div>
-
-        {/* Edit Form */}
-        {editingBanner && (
-          <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
-            <h2 className="text-2xl font-bold mb-5 text-gray-800">
-              Edit Banner
-            </h2>
-
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Banner Title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-
-              <div className="w-full">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-6 items-start"
+          >
+            {/* LEFT SIDE */}
+            <div className="space-y-8">
+              {/* Upload Image Button */}
+              <div>
                 <input
-                  id="edit-banner-upload"
+                  id="banner-upload"
                   type="file"
                   accept="image/*"
+                  className="hidden"
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      setEditImage(file);
-                      setEditPreviewUrl(URL.createObjectURL(file));
+                      setSelectedImage(file);
+                      setPreviewUrl(URL.createObjectURL(file));
                     }
                   }}
-                  className="hidden"
                 />
 
-                <button
-  type="button"
-  className="
-    cursor-pointer inline-block
-    bg-[#ee6786] active:bg-[#d45573]
-    text-white px-4 py-2 rounded-lg
-    transition-all hover:opacity-80 hover:scale-105
-    focus:outline-none focus:ring-0
-    active:outline-none
-  "
-  style={{ WebkitTapHighlightColor: "transparent" }}
->
-  Change Image
-</button>
+                <label
+                  htmlFor="banner-upload"
+                  className="inline-flex items-center justify-center
+          w-full py-3 rounded-lg border border-gray-300
+          bg-gray-50 cursor-pointer text-sm font-medium text-gray-700
+          hover:border-[#ee6786] hover:text-[#ee6786] transition"
+                >
+                  Upload Image
+                </label>
+              </div>
 
+              {/* Banner Title */}
+              <input
+                type="text"
+                placeholder="Enter banner title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full rounded-lg border border-gray-300
+        px-3 py-3 text-sm focus:ring-2 focus:ring-[#ee6786]/30
+        focus:border-[#ee6786] outline-none"
+              />
 
-                {editImage && (
-                  <span className="text-gray-700 font-medium ml-2">
-                    {editImage.name}
-                  </span>
-                )}
+              {error && (
+                <p className="text-sm font-medium text-red-500">{error}</p>
+              )}
 
-                {editPreviewUrl && (
+              {/* Upload Button */}
+              <button
+                type="submit"
+                disabled={isUploading}
+                className={`w-full rounded-lg py-3 text-sm font-semibold text-white transition ${
+                  isUploading
+                    ? "bg-[#ee6786]/60 cursor-not-allowed"
+                    : "bg-[#ee6786] hover:bg-[#d45573]"
+                }`}
+              >
+                {isUploading ? "Uploading..." : "Upload Banner"}
+              </button>
+            </div>
+
+            {/* RIGHT SIDE — PREVIEW */}
+            <div className="relative">
+              {previewUrl ? (
+                <>
                   <img
-                    src={editPreviewUrl}
-                    alt="Edit Preview"
-                    className="h-48 w-full object-contain rounded-md border border-gray-200 mt-2"
+                    src={previewUrl}
+                    alt="Preview"
+                    className="h-50 object-contain rounded-xl border"
                   />
-                )}
-              </div>
 
-              {error && <div className="text-red-500 font-medium">{error}</div>}
-
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={isUploading}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-white transition-colors ${
-                    isUploading
-                      ? "bg-[#ee6786] active:bg-[#d45573] cursor-not-allowed"
-                      : "bg-[#ee6786] active:bg-[#d45573]"
-                  }`}
+                  {/* ❌ Remove */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedImage(null);
+                      setPreviewUrl(null);
+                    }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full
+            bg-black/60 text-white flex items-center justify-center
+            hover:bg-black transition"
+                    title="Remove image"
+                  >
+                    ✕
+                  </button>
+                </>
+              ) : (
+                <div
+                  className="h-50 w-3/4 flex items-center justify-center
+        rounded-xl border border-dashed text-gray-400 text-sm"
                 >
-                  {isUploading ? "Updating..." : "Update Banner"}
-                </button>
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+                  Image preview will appear here
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
 
-        {/* Existing Banners - Grid Layout */}
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             All Banners ({banners.length})
           </h2>
@@ -312,50 +193,24 @@ function UploadBanner() {
               {banners.map((banner) => (
                 <div
                   key={banner.id}
-                  className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                  className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"
                 >
                   <img
                     src={banner.banner_image[0]}
                     alt={banner.banner_name}
                     className="h-48 w-full object-cover"
                   />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2 truncate">
+                  <div className="p-4 flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-800 truncate">
                       {banner.banner_name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Order: {banner.order}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => moveUp(banner.id)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
-                        title="Move Up"
-                      >
-                        ⬆️
-                      </button>
-                      <button
-                        onClick={() => moveDown(banner.id)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
-                        title="Move Down"
-                      >
-                        ⬇️
-                      </button>
-                      <button
-                        onClick={() => startEdit(banner)}
-                        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                        title="Edit Banner"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => removeBanner(banner.id)}
-                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                        title="Delete Banner"
-                      >
-                        🗑️
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => removeBanner(banner.id)}
+                      className="p-2 rounded-md text-black hover:scale-105 transition-all"
+                      title="Delete"
+                    >
+                      <LuTrash2 size={18} />
+                    </button>
                   </div>
                 </div>
               ))}
