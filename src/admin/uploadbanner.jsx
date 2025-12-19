@@ -69,21 +69,18 @@ function UploadBanner() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Upload Form */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-            Upload New Banner
-          </h2>
+        <div className="bg-white max-w-full mx-auto rounded-2xl border border-gray-200 p-6">
+          <div className="w-xl">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">
+              Upload New Banner
+            </h2>
 
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-6 items-start"
-          >
-            {/* LEFT SIDE */}
-            <div className="space-y-8">
-              {/* Upload Image Button */}
-              <div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* PREVIEW BOX */}
+              <div className="border border-dashed rounded-xl p-6 text-center relative">
+                {/* Hidden input */}
                 <input
                   id="banner-upload"
                   type="file"
@@ -98,15 +95,45 @@ function UploadBanner() {
                   }}
                 />
 
-                <label
-                  htmlFor="banner-upload"
-                  className="inline-flex items-center justify-center
-          w-full py-3 rounded-lg border border-gray-300
-          bg-gray-50 cursor-pointer text-sm font-medium text-gray-700
-          hover:border-[#ee6786] hover:text-[#ee6786] transition"
-                >
-                  Upload Image
-                </label>
+                {!previewUrl ? (
+                  <label
+                    htmlFor="banner-upload"
+                    className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#ee6786]"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                      +
+                    </div>
+                    <p className="text-sm font-medium">
+                      Click to upload banner image
+                    </p>
+                  </label>
+                ) : (
+                  <div className="space-y-4">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="max-h-60 mx-auto rounded-lg border object-contain"
+                    />
+
+                    {/* Image URL */}
+                    <p className="text-xs text-gray-500">
+                      {selectedImage?.name} ·{" "}
+                      {(selectedImage?.size / 1024).toFixed(1)} KB
+                    </p>
+
+                    {/* Remove */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="text-sm text-red-500 hover:underline"
+                    >
+                      Remove image
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Banner Title */}
@@ -115,9 +142,8 @@ function UploadBanner() {
                 placeholder="Enter banner title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-lg border border-gray-300
-        px-3 py-3 text-sm focus:ring-2 focus:ring-[#ee6786]/30
-        focus:border-[#ee6786] outline-none"
+                className="w-3/4 rounded-lg border border-gray-300 px-3 py-3 text-sm
+      focus:ring-2 focus:ring-[#ee6786]/30 focus:border-[#ee6786] outline-none"
               />
 
               {error && (
@@ -128,7 +154,7 @@ function UploadBanner() {
               <button
                 type="submit"
                 disabled={isUploading}
-                className={`w-full rounded-lg py-3 text-sm font-semibold text-white transition ${
+                className={`w-3/4 rounded-lg py-3 text-sm font-semibold text-white transition ${
                   isUploading
                     ? "bg-[#ee6786]/60 cursor-not-allowed"
                     : "bg-[#ee6786] hover:bg-[#d45573]"
@@ -136,43 +162,8 @@ function UploadBanner() {
               >
                 {isUploading ? "Uploading..." : "Upload Banner"}
               </button>
-            </div>
-
-            {/* RIGHT SIDE — PREVIEW */}
-            <div className="relative">
-              {previewUrl ? (
-                <>
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="h-50 object-contain rounded-xl border"
-                  />
-
-                  {/* ❌ Remove */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedImage(null);
-                      setPreviewUrl(null);
-                    }}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full
-            bg-black/60 text-white flex items-center justify-center
-            hover:bg-black transition"
-                    title="Remove image"
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <div
-                  className="h-50 w-3/4 flex items-center justify-center
-        rounded-xl border border-dashed text-gray-400 text-sm"
-                >
-                  Image preview will appear here
-                </div>
-              )}
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">

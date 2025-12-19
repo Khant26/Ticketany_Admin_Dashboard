@@ -634,7 +634,7 @@ function eventupload() {
                   disabled={!formData.event_name.trim() || loading}
                   className={`w-full h-11 rounded-md text-white font-medium transition ${
                     !formData.event_name.trim() || loading
-                      ? "bg-[#f28fa5]/40 cursor-not-allowed"
+                      ? "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 cursor-default"
                       : "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90"
                   }`}
                 >

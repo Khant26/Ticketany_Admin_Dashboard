@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { LuTrash2 } from "react-icons/lu";
 
 function CategoriesManagement() {
   const [categories, setCategories] = useState([]);
@@ -9,10 +10,6 @@ function CategoriesManagement() {
   const [newCategoryImage, setNewCategoryImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editImage, setEditImage] = useState(null);
-  const [editPreviewUrl, setEditPreviewUrl] = useState(null);
 
   const fetchCategories = async () => {
     try {
@@ -41,7 +38,8 @@ function CategoriesManagement() {
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-    if (!newCategoryName.trim()) return setError("Please enter a category name");
+    if (!newCategoryName.trim())
+      return setError("Please enter a category name");
 
     try {
       setIsCreating(true);
@@ -67,48 +65,8 @@ function CategoriesManagement() {
     }
   };
 
-  const startEdit = (category) => {
-    setEditingCategory(category);
-    setEditName(category.category_name);
-    setEditImage(null);
-    setEditPreviewUrl(category.category_image);
-  };
-
-  const cancelEdit = () => {
-    setEditingCategory(null);
-    setEditName("");
-    setEditImage(null);
-    setEditPreviewUrl(null);
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    if (!editName.trim()) return setError("Please enter a category name");
-
-    try {
-      setIsCreating(true);
-      let payload = { category_name: editName };
-
-      if (editImage) {
-        const base64Image = await toBase64(editImage);
-        payload.category_image = base64Image;
-      }
-
-      await axios.put(`http://127.0.0.1:8000/api/categories/${editingCategory.id}/`, payload);
-
-      setError("");
-      cancelEdit();
-      fetchCategories();
-    } catch (err) {
-      console.error(err);
-      setError("Failed to update category");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   const deleteCategory = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    if (!window.confirm("Delete this category?")) return;
     try {
       await axios.delete(`http://127.0.0.1:8000/api/categories/${id}/`);
       fetchCategories();
@@ -120,155 +78,106 @@ function CategoriesManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
-          <h2 className="text-2xl font-bold mb-5 text-gray-800">
-            Create New Category
-          </h2>
-
-          <form onSubmit={handleCreateCategory} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Category Name"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-
-            <div className="w-full">
-              <input
-                id="category-image-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setNewCategoryImage(file);
-                    setPreviewUrl(URL.createObjectURL(file));
-                  }
-                }}
-                className="hidden"
-              />
-
-              <label
-                htmlFor="category-image-upload"
-                className="cursor-pointer inline-block bg-[#ee6786] active:bg-[#d45573] text-white px-4 py-2 rounded-lg transition-all hover:opacity-80 hover:scale-105"
-              >
-                Choose Image (Optional)
-              </label>
-
-              {newCategoryImage && (
-                <span className="text-gray-700 font-medium ml-2">
-                  {newCategoryImage.name}
-                </span>
-              )}
-
-              {previewUrl && (
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="h-32 w-32 object-cover rounded-md border border-gray-200 mt-2"
-                />
-              )}
-            </div>
-
-            {error && <div className="text-red-500 font-medium">{error}</div>}
-
-            <button
-              type="submit"
-              disabled={isCreating}
-              className={`w-full py-2 rounded-lg font-semibold cursor-pointer text-white transition-all ${
-                isCreating
-                  ? "bg-[#ee6786] active:bg-[#d45573] hover:opacity-80 hover:scale-105"
-                  : "bg-[#ee6786] active:bg-[#d45573] hover:opacity-80 hover:scale-105"
-              }`}
-            >
-              {isCreating ? "Creating..." : "Create Category"}
-            </button>
-          </form>
-        </div>
-
-        {/* Edit Form */}
-        {editingCategory && (
-          <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
-            <h2 className="text-2xl font-bold mb-5 text-gray-800">
-              Edit Category
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Create Category Form */}
+        <div className="bg-white max-w-full mx-auto rounded-2xl border border-gray-200 p-6">
+          <div className="w-xl">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">
+              Create New Category
             </h2>
 
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Category Name"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
+            <form onSubmit={handleCreateCategory} className="space-y-6">
+              {/* Category Name */}
 
-              <div className="w-full">
+              {/* Preview Box */}
+              <div className="border border-dashed rounded-xl p-6 text-center relative">
+                {/* Hidden input */}
                 <input
-                  id="edit-category-image-upload"
+                  id="category-image-upload"
                   type="file"
                   accept="image/*"
+                  className="hidden"
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      setEditImage(file);
-                      setEditPreviewUrl(URL.createObjectURL(file));
+                      setNewCategoryImage(file);
+                      setPreviewUrl(URL.createObjectURL(file));
                     }
                   }}
-                  className="hidden"
                 />
 
-                <label
-                  htmlFor="edit-category-image-upload"
-                  className="cursor-pointer inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Change Image
-                </label>
+                {!previewUrl ? (
+                  <label
+                    htmlFor="category-image-upload"
+                    className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#ee6786]"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                      +
+                    </div>
+                    <p className="text-sm font-medium">
+                      Click to upload category image
+                    </p>
+                  </label>
+                ) : (
+                  <div className="space-y-4">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="max-h-60 mx-auto rounded-lg border object-contain"
+                    />
 
-                {editImage && (
-                  <span className="text-gray-700 font-medium ml-2">
-                    {editImage.name}
-                  </span>
-                )}
+                    {/* Image URL */}
+                    <p className="text-xs text-gray-500">
+                      {newCategoryImage?.name} ·{" "}
+                      {(newCategoryImage?.size / 1024).toFixed(1)} KB
+                    </p>
 
-                {editPreviewUrl && (
-                  <img
-                    src={editPreviewUrl}
-                    alt="Edit Preview"
-                    className="h-32 w-32 object-cover rounded-md border border-gray-200 mt-2"
-                  />
+                    {/* Remove */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewCategoryImage(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="text-sm text-red-500 hover:underline"
+                    >
+                      Remove image
+                    </button>
+                  </div>
                 )}
               </div>
 
-              {error && <div className="text-red-500 font-medium">{error}</div>}
+              {error && (
+                <p className="text-sm font-medium text-red-500">{error}</p>
+              )}
 
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-white transition-colors ${
-                    isCreating
-                      ? "bg-blue-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  }`}
-                >
-                  {isCreating ? "Updating..." : "Update Category"}
-                </button>
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </div>
+              <input
+                type="text"
+                placeholder="Enter category name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-3/4 rounded-lg border border-gray-300 px-3 py-3 text-sm
+                focus:ring-2 focus:ring-[#ee6786]/30 focus:border-[#ee6786] outline-none"
+              />
+
+              {/* Create Button */}
+              <button
+                type="submit"
+                disabled={isCreating}
+                className={`w-3/4 rounded-lg py-3 text-sm font-semibold text-white transition ${
+                  isCreating
+                    ? "bg-[#ee6786]/60 cursor-not-allowed"
+                    : "bg-[#ee6786] hover:bg-[#d45573]"
+                }`}
+              >
+                {isCreating ? "Creating..." : "Create Category"}
+              </button>
             </form>
           </div>
-        )}
+        </div>
 
         {/* Categories List */}
-        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             All Categories ({categories.length})
           </h2>
@@ -282,42 +191,30 @@ function CategoriesManagement() {
               No categories found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                  className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"
                 >
-                  <div className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      {category.category_image && (
-                        <img
-                          src={category.category_image}
-                          alt={category.category_name}
-                          className="w-12 h-12 rounded-full object-cover border border-gray-300"
-                        />
-                      )}
-                      <h3 className="font-semibold text-gray-800 flex-1">
-                        {category.category_name}
-                      </h3>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => startEdit(category)}
-                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                        title="Edit Category"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => deleteCategory(category.id)}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                        title="Delete Category"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
+                  {category.category_image && (
+                    <img
+                      src={category.category_image}
+                      alt={category.category_name}
+                      className="h-30 w-full object-cover"
+                    />
+                  )}
+                  <div className="p-4 flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {category.category_name}
+                    </h3>
+                    <button
+                      onClick={() => deleteCategory(category.id)}
+                      className="p-2 rounded-md text-black hover:scale-105 transition-all"
+                      title="Delete"
+                    >
+                      <LuTrash2 size={18} />
+                    </button>
                   </div>
                 </div>
               ))}
