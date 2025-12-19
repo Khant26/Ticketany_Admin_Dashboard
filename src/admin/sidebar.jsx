@@ -28,7 +28,7 @@ function Sidebar() {
   return (
     <aside
       style={{ top: "0", width: SIDEBAR_WIDTH }}
-      className="fixed left-0 bottom-0 z-30 bg-white text-gray-900 border-r-2 border-black"
+      className="fixed left-0 bottom-0 bg-white text-gray-900 border-r-2 border-black"
       aria-hidden={false}
     >
       <div className="flex items-center justify-center h-16 border-b-2 border-black px-4 bg-white">

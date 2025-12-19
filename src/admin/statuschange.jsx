@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FiRefreshCw } from "react-icons/fi";
 
 const API_BASE = "http://127.0.0.1:8000";
 
@@ -206,8 +207,12 @@ function StatusChange() {
         <button
           onClick={loadTickets}
           disabled={loading}
-          className="bg-white px-2 py-1 rounded-md border hover:bg-gray-200"
+          className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
         >
+          <FiRefreshCw
+            className={`${loading ? "animate-spin" : ""}`}
+            size={16}
+          />
           {loading ? "Refreshing…" : "Refresh"}
         </button>
       </div>
@@ -218,7 +223,7 @@ function StatusChange() {
 
       <div className="overflow-x-auto shadow-sm border border-gray-300 rounded-lg">
         <table className="bg-white w-full text-sm">
-          <thead className=" border-b border-gray-300">
+          <thead className=" border-b border-gray-400">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                 Order ID
@@ -251,7 +256,7 @@ function StatusChange() {
                   colSpan={7}
                   className="px-6 py-8 text-center text-gray-500 text-sm"
                 >
-                  No tickets found
+                  No tickets found.
                 </td>
               </tr>
             ) : (
@@ -267,10 +272,7 @@ function StatusChange() {
                   .sort((a, b) => Number(b) - Number(a))
                   .flatMap((orderId) =>
                     grouped[orderId].map((t, i) => (
-                      <tr
-                        key={t.id}
-                        className="hover:bg-gray-100 transition-colors"
-                      >
+                      <tr key={t.id}>
                         {i === 0 && (
                           <td
                             rowSpan={grouped[orderId].length}
@@ -311,7 +313,7 @@ function StatusChange() {
                           {(t.status || "").toLowerCase() === "pending" && (
                             <button
                               onClick={() => openPaidModal(t)}
-                              className="px-3 py-1 rounded border border-black text-black bg-transparent"
+                              className="px-3 py-1 hover:bg-gray-100 hover:scale-105 rounded border transition-all duration-200"
                             >
                               Mark Paid
                             </button>
@@ -319,7 +321,7 @@ function StatusChange() {
 
                           {(t.status || "").toLowerCase() === "paid" && (
                             <select
-                              className="border rounded px-2 py-1"
+                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
                               defaultValue=""
                               onChange={(e) => {
                                 const v = e.target.value;
@@ -340,7 +342,7 @@ function StatusChange() {
 
                           {(t.status || "").toLowerCase() === "complete" && (
                             <select
-                              className="border rounded px-2 py-1"
+                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
                               defaultValue=""
                               onChange={(e) => {
                                 const v = e.target.value;
@@ -359,7 +361,7 @@ function StatusChange() {
 
                           {(t.status || "").toLowerCase() === "cancel" && (
                             <select
-                              className="border rounded px-2 py-1"
+                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
                               defaultValue=""
                               onChange={(e) => {
                                 const v = e.target.value;
@@ -390,12 +392,12 @@ function StatusChange() {
       </div>
 
       {payModal.open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-full max-w-md">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-md w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Mark Ticket as Paid</h2>
             <input
-              className="w-full border p-2 mb-3"
-              placeholder="Customer Payment"
+              className="rounded-md w-full border border-gray-300 p-2 mb-3"
+              placeholder="Enter Customer payment"
               value={payModal.customer_payment}
               onChange={(e) =>
                 setPayModal((m) => ({
@@ -405,8 +407,8 @@ function StatusChange() {
               }
             />
             <input
-              className="w-full border p-2 mb-4"
-              placeholder="Payment Date"
+              className="rounded-md w-full border border-gray-300 p-2 mb-4 "
+              placeholder="Enter Payment date"
               value={payModal.payment_date}
               onChange={(e) =>
                 setPayModal((m) => ({
@@ -415,16 +417,15 @@ function StatusChange() {
                 }))
               }
             />
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 ">
               <button
-                className="border px-4 py-2"
+                className=" border px-4 py-2 hover:bg-gray-100 transition-all transition-duration-200"
                 onClick={() => setPayModal({ open: false, ticket: null })}
               >
                 Cancel
               </button>
               <button
-                className="px-4 py-2 text-white"
-                style={{ backgroundColor: "#e51f4b" }}
+                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all transition-duration-200"
                 onClick={submitPaid}
               >
                 Save
@@ -435,57 +436,69 @@ function StatusChange() {
       )}
 
       {completeModal.open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
+          <form
+            className="bg-white p-6 rounded w-full max-w-md"
+            onSubmit={submitCompleted}
+          >
             <h2 className="text-lg font-semibold mb-4">
               Mark Ticket as Completed
             </h2>
-            {["selling_price", "zone", "row", "seat"].map((f) => (
+
+            {[
+              { key: "selling_price", placeholder: "Enter Selling price" },
+              { key: "zone", placeholder: "Enter Zone" },
+              { key: "row", placeholder: "Enter Row" },
+              { key: "seat", placeholder: "Enter Seat" },
+            ].map(({ key, placeholder }) => (
               <input
-                key={f}
-                className="w-full border p-2 mb-3"
-                placeholder={f.replace("_", " ")}
-                value={completeModal[f]}
+                key={key}
+                className="rounded-md w-full border border-gray-300 p-2 mb-4"
+                placeholder={placeholder}
+                value={completeModal[key]}
                 onChange={(e) =>
                   setCompleteModal((m) => ({
                     ...m,
-                    [f]: e.target.value,
+                    [key]: e.target.value,
                   }))
                 }
               />
             ))}
+
             <div className="flex justify-end gap-2">
               <button
-                className="border px-4 py-2"
+                type="button"
+                className="border px-4 py-2 hover:bg-gray-100 transition-all duration-200"
                 onClick={() => setCompleteModal({ open: false, ticket: null })}
               >
                 Cancel
               </button>
+
               <button
-                className="px-4 py-2 text-white bg-green-600"
-                onClick={submitCompleted}
+                type="submit"
+                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
               >
                 Save
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 
       {confirmPending.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Confirm Revert</h2>
+            <h2 className="text-lg font-semibold mb-4">Revert to Pending</h2>
             <p className="mb-4">Are you sure you want to go back to pending?</p>
             <div className="flex justify-end gap-2">
               <button
-                className="border px-4 py-2"
+                className="border px-4 py-2 hover:bg-gray-100 transition-all duration-200"
                 onClick={() => setConfirmPending({ open: false, ticket: null })}
               >
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-gray-700"
+                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
                 onClick={revertToPending}
               >
                 Yes
@@ -498,22 +511,20 @@ function StatusChange() {
       {confirmCancel.open && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">
-              Confirm Cancel Ticket
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Cancel Ticket</h2>
             <p className="mb-4">
               Are you sure you want to cancel this ticket? This will initiate a
               refund process.
             </p>
             <div className="flex justify-end gap-2">
               <button
-                className="border px-4 py-2"
+                className="border px-4 py-2 hover:bg-gray-100 transition-all duration-200"
                 onClick={() => setConfirmCancel({ open: false, ticket: null })}
               >
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-red-600"
+                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
                 onClick={submitCancel}
               >
                 Yes, Cancel Ticket
