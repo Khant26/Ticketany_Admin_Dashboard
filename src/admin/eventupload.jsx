@@ -401,402 +401,343 @@ function eventupload() {
     }
   };
 
-  // Helper functions for event display
-  const getCategoryName = (categoryId) => {
-    if (!categoryId || categories.length === 0) return "Unknown Category";
-    const category = categories.find((cat) => cat.id === parseInt(categoryId));
-    return category ? category.category_name : `Category ID: ${categoryId}`;
+  // Helper to get events for a specific category
+  const getEventsForCategory = (categoryId) => {
+    return events.filter((event) => event.category === categoryId);
   };
 
-  const getCoverImage = (event) => {
+  // Helper to get cover image
+  const getCoverImageForDisplay = (event) => {
     if (event.event_image && typeof event.event_image === "string") {
       if (event.event_image.includes(IMAGE_SEPARATOR)) {
         const images = event.event_image.split(IMAGE_SEPARATOR);
-        return images[0]; // First image as cover
+        return images[0];
       } else {
-        return event.event_image; // Single image
+        return event.event_image;
       }
     }
     return null;
   };
 
-  const getImageCount = (event) => {
-    if (event.event_image && typeof event.event_image === "string") {
-      if (event.event_image.includes(IMAGE_SEPARATOR)) {
-        return event.event_image.split(IMAGE_SEPARATOR).length;
-      } else {
-        return 1;
-      }
-    }
-    return 0;
-  };
-
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Event Creation Form - replaced with AddNewEvents design */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-8">
-        <div className="grid grid-cols-12">
-          {/* Left: Posters area */}
-          <div className="col-span-12 md:col-span-5 p-4 sm:p-6 relative md:border-r md:pr-6 border-gray-200">
-            {/* Grid of slots */}
-            <div className="grid grid-cols-3 gap-4">
-              {Array.from({ length: slotCount }).map((_, i) => {
-                const pv = previews[i];
-                return (
-                  <div key={i} className="flex flex-col items-start">
-                    <div
-                      draggable={!!pv}
-                      onDragStart={pv ? handleDragStart(i) : undefined}
-                      onDragOver={handleDragOver(i)}
-                      onDrop={handleDrop(i)}
-                      className={`relative w-full aspect-[3/4] ${
-                        pv
-                          ? "border border-gray-300"
-                          : "border-2 border-dashed border-gray-300"
-                      } rounded-md overflow-hidden bg-gray-50`}
-                    >
-                      {pv ? (
-                        <>
-                          <img
-                            src={pv.url}
-                            alt={`poster-${i + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          {/* Delete button */}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(i)}
-                            className="absolute top-1 left-1 bg-black/80 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-black"
-                            title="Remove"
+    <div className="min-h-screen bg-gray-50 pt-6 pb-16">
+      {/* Event Creation Form Section */}
+      <div className="max-w-6xl mx-auto mb-12">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+          <div className="grid grid-cols-12">
+            {/* Left: Posters area */}
+            <div className="col-span-12 md:col-span-5 p-4 sm:p-6 relative md:border-r md:pr-6 border-gray-200">
+              {/* Grid of slots */}
+              <div className="grid grid-cols-3 gap-4">
+                {Array.from({ length: slotCount }).map((_, i) => {
+                  const pv = previews[i];
+                  return (
+                    <div key={i} className="flex flex-col items-start">
+                      <div
+                        draggable={!!pv}
+                        onDragStart={pv ? handleDragStart(i) : undefined}
+                        onDragOver={handleDragOver(i)}
+                        onDrop={handleDrop(i)}
+                        className={`relative w-full aspect-[3/4] ${
+                          pv
+                            ? "border border-gray-300"
+                            : "border-2 border-dashed border-gray-300"
+                        } rounded-md overflow-hidden bg-gray-50`}
+                      >
+                        {pv ? (
+                          <>
+                            <img
+                              src={pv.url}
+                              alt={`poster-${i + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Delete button */}
+                            <button
+                              type="button"
+                              onClick={() => removeImage(i)}
+                              className="absolute top-1 left-1 bg-black/80 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-black"
+                              title="Remove"
+                            >
+                              ×
+                            </button>
+                            {/* Drag hint */}
+                            <div className="absolute bottom-1 right-1 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-white">
+                              drag
+                            </div>
+                          </>
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center text-gray-400 text-xs"
+                            title="Empty slot"
                           >
-                            ×
-                          </button>
-                          {/* Drag hint */}
-                          <div className="absolute bottom-1 right-1 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-white">
-                            drag
+                            Empty
                           </div>
-                        </>
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center text-gray-400 text-xs"
-                          title="Empty slot"
-                        >
-                          Empty
+                        )}
+                      </div>
+                      {/* Number below tile */}
+                      <div className="mt-2 w-full flex justify-start">
+                        <div className="w-6 h-6 rounded-full border border-gray-400 text-gray-700 text-xs flex items-center justify-center">
+                          {i + 1}
                         </div>
-                      )}
-                    </div>
-                    {/* Number below tile */}
-                    <div className="mt-2 w-full flex justify-start">
-                      <div className="w-6 h-6 rounded-full border border-gray-400 text-gray-700 text-xs flex items-center justify-center">
-                        {i + 1}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Footer controls under grid */}
-            <div className="mt-6 flex items-center justify-between">
-              <div className="text-xs text-gray-600">
-                <p>Drag to move posters and</p>
-                <p>arrange display sequence</p>
+                  );
+                })}
               </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50"
-                >
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-gray-900">
-                    <span className="text-gray-900 text-base leading-none">+</span>
-                  </span>
-                  <span className="text-sm">Add new poster</span>
-                </button>
-                <input
-                  ref={fileInputRef}
-                  id="image-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Form */}
-          <div className="col-span-12 md:col-span-7 p-4 sm:p-6">
-            <div className="space-y-4">
-              {/* Event name */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Event name</label>
-                <input
-                  type="text"
-                  name="event_name"
-                  value={formData.event_name}
-                  onChange={handleInputChange}
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Date */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Date</label>
-                <input
-                  type="text"
-                  name="event_date"
-                  value={formData.event_date}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 2025-09-28"
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Time */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Time</label>
-                <input
-                  type="text"
-                  name="event_time"
-                  value={formData.event_time}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 18:30"
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Location */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Location</label>
-                <input
-                  type="text"
-                  name="event_location"
-                  value={formData.event_location}
-                  onChange={handleInputChange}
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Sale Date */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Sale Date</label>
-                <input
-                  type="text"
-                  name="sale_date"
-                  value={formData.sale_date}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 2025-09-15"
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Price */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Price</label>
-                <input
-                  type="text"
-                  name="ticket_price"
-                  value={formData.ticket_price}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Premium - 1000, Regular - 500"
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                />
-              </div>
-
-              {/* Category (visible selector) */}
-              <div className="flex items-center gap-4">
-                <label className="w-32 text-gray-700">Category</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                >
-                  {categories.length === 0 ? (
-                    <option value="">Loading categories...</option>
-                  ) : (
-                    categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.category_name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              {/* Create button */}
-              <div className="pt-2">
-                <button
-                  onClick={uploadEvent}
-                  disabled={!formData.event_name.trim() || loading}
-                  className={`w-full h-11 rounded-md text-white font-medium transition ${
-                    !formData.event_name.trim() || loading
-                      ? "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 cursor-default"
-                      : "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90"
-                  }`}
-                >
-                  {loading ? "Creating Event..." : "Create Event"}
-                </button>
-              </div>
-
-              {/* Status */}
-              {uploadStatus && (
-                <div
-                  className={`text-sm mt-2 p-2 rounded ${
-                    uploadStatus.includes("✅")
-                      ? "bg-green-100 text-green-800"
-                      : uploadStatus.includes("❌")
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {uploadStatus}
+              {/* Footer controls under grid */}
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-xs text-gray-600">
+                  <p>Drag to move posters and</p>
+                  <p>arrange display sequence</p>
                 </div>
-              )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50"
+                  >
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-gray-900">
+                      <span className="text-gray-900 text-base leading-none">
+                        +
+                      </span>
+                    </span>
+                    <span className="text-sm">Add new poster</span>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    id="image-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Events Display Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Uploaded Events ({events.length})
-          </h2>
-          <button
-            onClick={fetchEvents}
-            disabled={fetchingEvents}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-          >
-            {fetchingEvents ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+            {/* Right: Form */}
+            <div className="col-span-12 md:col-span-7 p-4 sm:p-6">
+              <div className="space-y-4">
+                {/* Event name */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Event name</label>
+                  <input
+                    type="text"
+                    name="event_name"
+                    value={formData.event_name}
+                    onChange={handleInputChange}
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
 
-        {fetchingEvents ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading events...</p>
-          </div>
-        ) : events.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No events found</p>
-            <p className="text-gray-500 text-sm mt-2">
-              Create an event above to see it here
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => {
-              const coverImage = getCoverImage(event);
-              const imageCount = getImageCount(event);
+                {/* Date */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Date</label>
+                  <input
+                    type="text"
+                    name="event_date"
+                    value={formData.event_date}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2025-09-28"
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
 
-              return (
-                <div
-                  key={event.id}
-                  className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-                >
-                  {/* Event Image */}
-                  <div className="relative h-48 bg-gray-200">
-                    {coverImage ? (
-                      <img
-                        src={coverImage}
-                        alt={event.event_name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
+                {/* Time */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Time</label>
+                  <input
+                    type="text"
+                    name="event_time"
+                    value={formData.event_time}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 18:30"
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
+
+                {/* Location */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Location</label>
+                  <input
+                    type="text"
+                    name="event_location"
+                    value={formData.event_location}
+                    onChange={handleInputChange}
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
+
+                {/* Sale Date */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Sale Date</label>
+                  <input
+                    type="text"
+                    name="sale_date"
+                    value={formData.sale_date}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2025-09-15"
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Price</label>
+                  <input
+                    type="text"
+                    name="ticket_price"
+                    value={formData.ticket_price}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Premium - 1000, Regular - 500"
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  />
+                </div>
+
+                {/* Category (visible selector) */}
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-gray-700">Category</label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                  >
+                    {categories.length === 0 ? (
+                      <option value="">Loading categories...</option>
                     ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500">No Image</span>
-                      </div>
+                      categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.category_name}
+                        </option>
+                      ))
                     )}
-
-                    {/* Fallback for failed image loads */}
-                    <div
-                      className="w-full h-full bg-gray-200 items-center justify-center absolute top-0 left-0"
-                      style={{ display: "none" }}
-                    >
-                      <span className="text-gray-500">Image Failed</span>
-                    </div>
-
-                    {/* Multiple Images Badge */}
-                    {imageCount > 1 && (
-                      <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-                        +{imageCount - 1} more
-                      </div>
-                    )}
-
-                    {/* Image Count Badge */}
-                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs">
-                      {imageCount} image{imageCount !== 1 ? "s" : ""}
-                    </div>
-                  </div>
-
-                  {/* Event Details */}
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
-                      {event.event_name}
-                    </h3>
-
-                    <div className="space-y-1 text-sm text-gray-600 mb-4">
-                      {event.event_location && (
-                        <p>
-                          <span className="font-medium">Location:</span>{" "}
-                          {event.event_location}
-                        </p>
-                      )}
-                      {event.event_date && (
-                        <p>
-                          <span className="font-medium">Date:</span>{" "}
-                          {new Date(event.event_date).toLocaleDateString()}
-                        </p>
-                      )}
-                      {event.event_time && (
-                        <p>
-                          <span className="font-medium">Time:</span>{" "}
-                          {event.event_time}
-                        </p>
-                      )}
-                      {event.ticket_price && (
-                        <p>
-                          <span className="font-medium">Price:</span> $
-                          {event.ticket_price}
-                        </p>
-                      )}
-                      <p>
-                        <span className="font-medium">Category:</span>{" "}
-                        {getCategoryName(event.category)} (ID: {event.category})
-                      </p>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/admin/events/${event.id}/edit`)}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors"
-                      >
-                        View Details
-                      </button>
-                      <button
-                        onClick={() => deleteEvent(event.id)}
-                        className="px-3 py-2 bg-red-600 text-white rounded text-sm font-medium hover:bg-red-700 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+                  </select>
                 </div>
-              );
-            })}
+
+                {/* Create button */}
+                <div className="pt-2">
+                  <button
+                    onClick={uploadEvent}
+                    disabled={!formData.event_name.trim() || loading}
+                    className={`w-full h-11 rounded-md text-white font-medium transition ${
+                      !formData.event_name.trim() || loading
+                        ? "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 cursor-default"
+                        : "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90"
+                    }`}
+                  >
+                    {loading ? "Creating Event..." : "Create Event"}
+                  </button>
+                </div>
+
+                {/* Status */}
+                {uploadStatus && (
+                  <div
+                    className={`text-sm mt-2 p-2 rounded ${
+                      uploadStatus.includes("✅")
+                        ? "bg-green-100 text-green-800"
+                        : uploadStatus.includes("❌")
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {uploadStatus}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Events Display Section with Categories */}
+      {events.length === 0 ? (
+        <div className="max-w-full mx-auto px-4 text-center py-12">
+          <p className="text-gray-600 text-lg">No events found</p>
+          <p className="text-gray-500 text-sm mt-2">
+            Create an event above to see it here
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm px-6 py-6  mx-auto max-w-7xl">
+          {/* Events by Categories */}
+          {categories.map((category) => {
+            const categoryEvents = getEventsForCategory(category.id);
+            if (categoryEvents.length === 0) return null;
+
+            return (
+              <div key={category.id} className="mb-16">
+                <h3 className="text-2xl sm:text-2xl font-bold tracking-tight text-gray-900 mb-8">
+                  {category.category_name}
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                  {categoryEvents.map((event) => {
+                    const coverImage = getCoverImageForDisplay(event);
+                    const imageCount = event.event_image
+                      ? event.event_image.split(IMAGE_SEPARATOR).length
+                      : 0;
+
+                    return (
+                      <button
+                        key={event.id}
+                        onClick={() =>
+                          navigate(`/admin/events/${event.id}/edit`)
+                        }
+                        className="group relative block w-full rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 overflow-hidden text-left bg-white"
+                      >
+                        {/* Image */}
+                        {coverImage ? (
+                          <img
+                            src={coverImage}
+                            alt={event.event_name}
+                            className="w-70 h-70 object-cover block"
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                "https://via.placeholder.com/400x256/e2e8f0/64748b?text=" +
+                                encodeURIComponent(event.event_name);
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-80 bg-gray-200 flex flex-col items-center justify-center text-gray-500">
+                            <div className="text-lg font-bold">
+                              {event.event_name}
+                            </div>
+                            <div className="text-sm">No Posters Available</div>
+                          </div>
+                        )}
+
+                        {/* Image count badge */}
+                        {imageCount > 0 && (
+                          <div className="absolute top-3 right-3 bg-black/70 text-white rounded-full px-3 py-1 text-xs font-semibold">
+                            {imageCount} {imageCount === 1 ? "image" : "images"}
+                          </div>
+                        )}
+
+                        {/* Content */}
+                        <div className="flex flex-col p-4 gap-2">
+                          <div className="text-sm font-medium text-red-500">
+                            {event.event_date}
+                          </div>
+                          <div className="text-md font-semibold text-gray-900">
+                            {event.event_name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {event.event_location}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, NavLink } from "react-router";
 
 const SIDEBAR_WIDTH = "16rem"; // Tailwind w-64
 
@@ -38,9 +38,13 @@ function Sidebar() {
       <nav className="mt-4">
         <div className="px-4 py-2">
           <div className="space-y-1">
-            <Link
+            <NavLink
               to="/admin"
-              className="flex items-center px-4 py-2 text-sm rounded-lg hover:bg-gray-100"
+              end
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 text-sm rounded-lg
+     ${isActive ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}`
+              }
               title="Dashboard"
             >
               <svg
@@ -63,11 +67,14 @@ function Sidebar() {
                 />
               </svg>
               <span>Home</span>
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/admin/statuschange"
-              className="flex items-center px-4 py-2 text-sm rounded-lg hover:bg-gray-100"
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 text-sm rounded-lg 
+     ${isActive ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}`
+              }
               title="Status Change"
             >
               <svg
@@ -84,11 +91,14 @@ function Sidebar() {
                 />
               </svg>
               <span>Change Status</span>
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/admin/eventupload"
-              className="flex items-center px-4 py-2 text-sm rounded-lg hover:bg-gray-100"
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 text-sm rounded-lg 
+     ${isActive ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}`
+              }
               title="Event Management"
             >
               <svg
@@ -105,11 +115,14 @@ function Sidebar() {
                 />
               </svg>
               <span>Events</span>
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/admin/uploadbanner"
-              className="flex items-center px-4 py-2 text-sm rounded-lg hover:bg-gray-100"
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 text-sm rounded-lg 
+     ${isActive ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}`
+              }
               title="Banner Management"
             >
               <svg
@@ -126,11 +139,14 @@ function Sidebar() {
                 />
               </svg>
               <span>Banners</span>
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/admin/categories"
-              className="flex items-center px-4 py-2 text-sm rounded-lg hover:bg-gray-100"
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 text-sm rounded-lg 
+     ${isActive ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}`
+              }
               title="Category Management"
             >
               <svg
@@ -147,7 +163,7 @@ function Sidebar() {
                 />
               </svg>
               <span>Category</span>
-            </Link>
+            </NavLink>
           </div>
         </div>
       </nav>

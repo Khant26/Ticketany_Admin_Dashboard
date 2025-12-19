@@ -102,12 +102,19 @@ function EditEvent() {
   const posters = useMemo(
     () => [
       ...existingImages.map((url) => ({ kind: "existing", url })),
-      ...newFiles.map((nf) => ({ kind: "new", url: nf.preview, file: nf.file })),
+      ...newFiles.map((nf) => ({
+        kind: "new",
+        url: nf.preview,
+        file: nf.file,
+      })),
     ],
     [existingImages, newFiles]
   );
 
-  const slotCount = useMemo(() => Math.max(6, posters.length || 0), [posters.length]);
+  const slotCount = useMemo(
+    () => Math.max(6, posters.length || 0),
+    [posters.length]
+  );
 
   const handleNewFiles = (e) => {
     const files = Array.from(e.target.files || []);
@@ -203,7 +210,9 @@ function EditEvent() {
       }
 
       // Build final images in current order
-      const finalImages = combined.map((it) => (it.kind === "existing" ? it.url : null));
+      const finalImages = combined.map((it) =>
+        it.kind === "existing" ? it.url : null
+      );
       // Replace nulls (for new) with compressedNew in order encountered
       let ni = 0;
       for (let i = 0; i < finalImages.length; i++) {
@@ -214,8 +223,12 @@ function EditEvent() {
 
       const payload = {
         ...formData,
-        ticket_price: formData.ticket_price ? String(formData.ticket_price) : null,
-        event_image: finalImages.length ? finalImages.join(IMAGE_SEPARATOR) : null,
+        ticket_price: formData.ticket_price
+          ? String(formData.ticket_price)
+          : null,
+        event_image: finalImages.length
+          ? finalImages.join(IMAGE_SEPARATOR)
+          : null,
       };
 
       const res = await fetch(`http://127.0.0.1:8000/api/events/${id}/`, {
@@ -273,9 +286,20 @@ function EditEvent() {
               className="p-1 rounded hover:bg-gray-100"
               title="Edit"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M12 20h9" strokeWidth="2" strokeLinecap="round"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+                <path
+                  d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></path>
               </svg>
             </button>
           </div>
@@ -299,7 +323,55 @@ function EditEvent() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/admin/eventupload")}
+            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition"
+            title="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <h2 className="text-2xl font-bold">Edit Event</h2>
+        </div>
+        <button
+          onClick={deleteEvent}
+          className=" flex items-center gap-2 px-4 py-2 rounded-md text-gray-700 hover:text-red-600 hover:bg-red-50 transition"
+          title="Delete Event"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+          <span className="text-sm font-medium">Delete Event</span>
+        </button>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden relative">
+        {/* Delete button in top right */}
+
         <div className="grid grid-cols-12">
           {/* Left: Posters */}
           <div className="col-span-12 md:col-span-5 p-4 sm:p-6 relative md:border-r md:pr-6 border-gray-200">
@@ -314,12 +386,18 @@ function EditEvent() {
                       onDragOver={onDragOver(i)}
                       onDrop={onDrop(i)}
                       className={`relative w-full aspect-[3/4] ${
-                        item ? "border border-gray-300" : "border-2 border-dashed border-gray-300"
+                        item
+                          ? "border border-gray-300"
+                          : "border-2 border-dashed border-gray-300"
                       } rounded-md overflow-hidden bg-gray-50`}
                     >
                       {item ? (
                         <>
-                          <img src={item.url} alt={`poster-${i + 1}`} className="w-full h-full object-cover" />
+                          <img
+                            src={item.url}
+                            alt={`poster-${i + 1}`}
+                            className="w-full h-full object-cover"
+                          />
                           <button
                             type="button"
                             onClick={() => removePosterAt(i)}
@@ -361,7 +439,9 @@ function EditEvent() {
                   className="flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-50"
                 >
                   <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-gray-900">
-                    <span className="text-gray-900 text-base leading-none">+</span>
+                    <span className="text-gray-900 text-base leading-none">
+                      +
+                    </span>
                   </span>
                   <span className="text-sm">Add new poster</span>
                 </button>
@@ -378,36 +458,76 @@ function EditEvent() {
           </div>
 
           {/* Right: Inline-edit details */}
-          <div className="col-span-12 md:col-span-7 p-4 sm:p-6">
+          <div className="col-span-12 md:col-span-7 p-4 sm:p-6 pt-16">
             <div className="space-y-5">
-              <InlineRow label="Event" name="event_name" placeholder="Event name" />
-              <InlineRow label="Date" name="event_date" placeholder="12 Sep, 13 Sep..." />
-              <InlineRow label="Time" name="event_time" placeholder="20:00 - 22:00" />
-              <InlineRow label="Location" name="event_location" placeholder="Venue or address" />
-              <InlineRow label="Sale Date" name="sale_date" placeholder="1 July 2025 - 2 Sep 2025" />
-              <InlineRow label="Price" name="ticket_price" placeholder="1799 THB, 2599 THB, ..." />
+              <InlineRow
+                label="Event"
+                name="event_name"
+                placeholder="Event name"
+              />
+              <InlineRow
+                label="Date"
+                name="event_date"
+                placeholder="12 Sep, 13 Sep..."
+              />
+              <InlineRow
+                label="Time"
+                name="event_time"
+                placeholder="20:00 - 22:00"
+              />
+              <InlineRow
+                label="Location"
+                name="event_location"
+                placeholder="Venue or address"
+              />
+              <InlineRow
+                label="Sale Date"
+                name="sale_date"
+                placeholder="1 July 2025 - 2 Sep 2025"
+              />
+              <InlineRow
+                label="Price"
+                name="ticket_price"
+                placeholder="1799 THB, 2599 THB, ..."
+              />
+
+              {/* Category Select */}
+              <div className="flex items-center gap-4">
+                <label className="w-32 text-gray-700">Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => handleInput("category", e.target.value)}
+                  className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                >
+                  {categories.length === 0 ? (
+                    <option value="">Loading categories...</option>
+                  ) : (
+                    categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.category_name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
 
               <div className="pt-2 flex flex-col gap-3">
                 <button
                   onClick={updateEvent}
                   disabled={loading}
                   className={`w-full h-11 rounded-md text-white font-medium transition ${
-                    loading ? "bg-[#f28fa5]/40 cursor-not-allowed" : "bg-[#f28fa5] hover:bg-[#f28fa5]/90"
+                    loading
+                      ? "bg-[ee6786ff]/40 cursor-not-allowed"
+                      : "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90"
                   }`}
                 >
                   {loading ? "Updating..." : "Save Changes"}
                 </button>
 
-                <button
-                  onClick={deleteEvent}
-                  className="w-full h-11 rounded-md text-white font-medium"
-                  style={{ backgroundColor: "#ee6786ff" }}
-                >
-                  Delete Event
-                </button>
-
                 {status && (
-                  <div className="text-sm mt-1 p-2 rounded bg-gray-50 border border-gray-200">{status}</div>
+                  <div className="text-sm mt-1 p-2 rounded bg-gray-50 border border-gray-200">
+                    {status}
+                  </div>
                 )}
               </div>
             </div>

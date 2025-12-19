@@ -171,7 +171,7 @@ function AllTickets() {
         <button
           onClick={loadAll}
           disabled={loading}
-          className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100"
+          className="px-4 py-2 rounded-md border border-gray-300 text-sm bg-white hover:bg-gray-100"
         >
           {loading ? "Refreshing…" : "Refresh"}
         </button>
