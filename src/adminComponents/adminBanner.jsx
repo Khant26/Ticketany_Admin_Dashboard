@@ -6,10 +6,22 @@ import axios from "axios";
 function AdminBanner() {
   const [banner, setBanner] = useState([]);
 
+  const API_BASE = "http://127.0.0.1:8000";
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+  const authHeaders = () => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/banners/");
+        const response = await axios.get(`${API_BASE}/api/banners/`, {
+          headers: authHeaders(),
+        });
         const bannerData = response.data.map((b) => ({
           id: b.id,
           image:

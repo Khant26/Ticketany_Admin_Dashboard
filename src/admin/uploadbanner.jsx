@@ -3,6 +3,18 @@ import axios from "axios";
 import { LuTrash2 } from "react-icons/lu";
 
 function UploadBanner() {
+  const API_BASE = "http://127.0.0.1:8000";
+
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const authHeaders = () => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const [banners, setBanners] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -14,7 +26,9 @@ function UploadBanner() {
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/banners/");
+      const res = await axios.get(`${API_BASE}/api/banners/`, {
+        headers: authHeaders(),
+      });
       const sorted = res.data.sort((a, b) => a.order - b.order);
       setBanners(sorted);
     } catch {
@@ -41,13 +55,19 @@ function UploadBanner() {
     if (!title.trim()) return setError("Please enter a banner title");
     if (!selectedImage) return setError("Please select an image");
 
+    if (!getToken()) return setError("Please login as admin to upload banners");
+
     try {
       setIsUploading(true);
       const base64 = await toBase64(selectedImage);
-      await axios.post("http://127.0.0.1:8000/api/banners/", {
-        banner_name: title,
-        banner_image: [base64],
-      });
+      await axios.post(
+        `${API_BASE}/api/banners/`,
+        {
+          banner_name: title,
+          banner_image: [base64],
+        },
+        { headers: authHeaders() }
+      );
 
       setTitle("");
       setSelectedImage(null);
@@ -63,8 +83,15 @@ function UploadBanner() {
 
   const removeBanner = async (id) => {
     if (!window.confirm("Delete this banner?")) return;
-    await axios.delete(`http://127.0.0.1:8000/api/banners/${id}/`);
-    fetchBanners();
+    if (!getToken()) return setError("Please login as admin to delete banners");
+    try {
+      await axios.delete(`${API_BASE}/api/banners/${id}/`, {
+        headers: authHeaders(),
+      });
+      fetchBanners();
+    } catch {
+      setError("Failed to delete banner");
+    }
   };
 
   return (

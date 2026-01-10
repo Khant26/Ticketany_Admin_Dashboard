@@ -5,6 +5,21 @@ function EditEvent() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const API_BASE = "http://127.0.0.1:8000";
+
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const authHeaders = (json = false) => {
+    const token = getToken();
+    const h = {};
+    if (token) h.Authorization = `Bearer ${token}`;
+    if (json) h["Content-Type"] = "application/json";
+    return h;
+  };
+
   // Data
   const [formData, setFormData] = useState({
     event_name: "",
@@ -52,7 +67,9 @@ function EditEvent() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/categories/");
+      const res = await fetch(`${API_BASE}/api/categories/`, {
+        headers: authHeaders(),
+      });
       if (!res.ok) return;
       const data = await res.json();
       setCategories(data || []);
@@ -63,7 +80,14 @@ function EditEvent() {
 
   const fetchEvent = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/events/${id}/`);
+      const res = await fetch(`${API_BASE}/api/events/${id}/`, {
+        headers: authHeaders(),
+      });
+      if (res.status === 401 || res.status === 403) {
+        setStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        navigate("/admin/login");
+        return;
+      }
       if (!res.ok) return;
       const data = await res.json();
 
@@ -198,6 +222,13 @@ function EditEvent() {
     setLoading(true);
     setStatus("Updating event...");
 
+    if (!getToken()) {
+      setStatus("❌ Please login as admin to update events");
+      navigate("/admin/login");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Compress new files in current visual order
       const combined = posters;
@@ -231,11 +262,17 @@ function EditEvent() {
           : null,
       };
 
-      const res = await fetch(`http://127.0.0.1:8000/api/events/${id}/`, {
+      const res = await fetch(`${API_BASE}/api/events/${id}/`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(true),
         body: JSON.stringify(payload),
       });
+
+      if (res.status === 401 || res.status === 403) {
+        setStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -256,10 +293,24 @@ function EditEvent() {
 
   const deleteEvent = async () => {
     if (!window.confirm("Delete this event?")) return;
+
+    if (!getToken()) {
+      setStatus("❌ Please login as admin to delete events");
+      navigate("/admin/login");
+      return;
+    }
+
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/events/${id}/`, {
+      const res = await fetch(`${API_BASE}/api/events/${id}/`, {
         method: "DELETE",
+        headers: authHeaders(),
       });
+
+      if (res.status === 401 || res.status === 403) {
+        setStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        navigate("/admin/login");
+        return;
+      }
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setStatus(`❌ Failed to delete: ${JSON.stringify(data)}`);

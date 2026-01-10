@@ -30,10 +30,24 @@ function eventupload() {
   const MAX_FILES = 10;
   const MAX_SIZE_MB = 5;
   const IMAGE_SEPARATOR = "|||SEPARATOR|||";
+  const API_BASE = "http://127.0.0.1:8000";
 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const dragIndex = useRef(null);
+
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const authHeaders = (json = false) => {
+    const token = getToken();
+    const h = {};
+    if (token) h.Authorization = `Bearer ${token}`;
+    if (json) h["Content-Type"] = "application/json";
+    return h;
+  };
 
   // Fetch events and categories on component mount
   useEffect(() => {
@@ -44,7 +58,9 @@ function eventupload() {
   // Fetch categories from backend API
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/categories/");
+      const response = await fetch(`${API_BASE}/api/categories/`, {
+        headers: authHeaders(),
+      });
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -64,7 +80,9 @@ function eventupload() {
   const fetchEvents = async () => {
     setFetchingEvents(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/events/");
+      const response = await fetch(`${API_BASE}/api/events/`, {
+        headers: authHeaders(),
+      });
       if (response.ok) {
         const data = await response.json();
         setEvents(data);
@@ -301,7 +319,7 @@ function eventupload() {
         event_date: toNullIfEmpty(formData.event_date),
         sale_date: toNullIfEmpty(formData.sale_date),
         ticket_price: toNullIfEmpty(formData.ticket_price),
-        category: parseInt(formData.category),
+        category: formData.category ? parseInt(formData.category, 10) : null,
         // Store multiple images as comma-separated string
         event_image:
           compressedImages.length > 0
@@ -322,13 +340,26 @@ function eventupload() {
     try {
       setUploadStatus("Uploading to server...");
 
-      const response = await fetch("http://127.0.0.1:8000/api/events/", {
+      const token = getToken();
+      if (!token) {
+        setUploadStatus("❌ Please login as admin to create events");
+        navigate("/admin/login");
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/api/events/`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          ...authHeaders(true),
         },
         body: JSON.stringify(payload),
       });
+
+      if (response.status === 401 || response.status === 403) {
+        setUploadStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       const contentType = response.headers.get("content-type");
       const responseData =
@@ -381,13 +412,27 @@ function eventupload() {
       return;
     }
 
+    const token = getToken();
+    if (!token) {
+      setUploadStatus("❌ Please login as admin to delete events");
+      navigate("/admin/login");
+      return;
+    }
+
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/events/${eventId}/`,
+        `${API_BASE}/api/events/${eventId}/`,
         {
           method: "DELETE",
+          headers: authHeaders(),
         }
       );
+
+      if (response.status === 401 || response.status === 403) {
+        setUploadStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        navigate("/admin/login");
+        return;
+      }
 
       if (response.ok) {
         setUploadStatus("✅ Event deleted successfully");

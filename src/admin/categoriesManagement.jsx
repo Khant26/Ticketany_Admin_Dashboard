@@ -3,6 +3,18 @@ import axios from "axios";
 import { LuTrash2 } from "react-icons/lu";
 
 function CategoriesManagement() {
+  const API_BASE = "http://127.0.0.1:8000";
+
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const authHeaders = () => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +25,9 @@ function CategoriesManagement() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/categories/");
+      const res = await axios.get(`${API_BASE}/api/categories/`, {
+        headers: authHeaders(),
+      });
       setCategories(res.data);
       setIsLoading(false);
     } catch (err) {
@@ -41,6 +55,8 @@ function CategoriesManagement() {
     if (!newCategoryName.trim())
       return setError("Please enter a category name");
 
+    if (!getToken()) return setError("Please login as admin to create categories");
+
     try {
       setIsCreating(true);
       let payload = { category_name: newCategoryName };
@@ -50,7 +66,9 @@ function CategoriesManagement() {
         payload.category_image = base64Image;
       }
 
-      await axios.post("http://127.0.0.1:8000/api/categories/", payload);
+      await axios.post(`${API_BASE}/api/categories/`, payload, {
+        headers: authHeaders(),
+      });
 
       setNewCategoryName("");
       setNewCategoryImage(null);
@@ -67,8 +85,11 @@ function CategoriesManagement() {
 
   const deleteCategory = async (id) => {
     if (!window.confirm("Delete this category?")) return;
+    if (!getToken()) return setError("Please login as admin to delete categories");
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/categories/${id}/`);
+      await axios.delete(`${API_BASE}/api/categories/${id}/`, {
+        headers: authHeaders(),
+      });
       fetchCategories();
     } catch (err) {
       console.error(err);

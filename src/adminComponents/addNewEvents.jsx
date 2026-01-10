@@ -1,6 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 function AddNewEvents() {
+  const API_BASE = "http://127.0.0.1:8000";
+
+  const getToken = () =>
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken");
+
+  const authHeaders = (json = false) => {
+    const token = getToken();
+    const h = {};
+    if (token) h.Authorization = `Bearer ${token}`;
+    if (json) h["Content-Type"] = "application/json";
+    return h;
+  };
+
   // Form state
   const [formData, setFormData] = useState({
     event_name: "",
@@ -35,7 +50,9 @@ function AddNewEvents() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/categories/");
+        const res = await fetch(`${API_BASE}/api/categories/`, {
+          headers: authHeaders(),
+        });
         if (!res.ok) throw new Error("Failed to fetch categories");
         const data = await res.json();
         setCategories(data || []);
@@ -209,11 +226,22 @@ function AddNewEvents() {
   const sendEventData = async (payload) => {
     try {
       setUploadStatus("Uploading to server...");
-      const res = await fetch("http://127.0.0.1:8000/api/events/", {
+
+      if (!getToken()) {
+        setUploadStatus("❌ Please login as admin to create events");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/api/events/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(true),
         body: JSON.stringify(payload),
       });
+
+      if (res.status === 401 || res.status === 403) {
+        setUploadStatus("❌ Unauthorized/Forbidden (admin only). Please login again.");
+        return;
+      }
 
       const ct = res.headers.get("content-type");
       const data = ct && ct.includes("application/json")
