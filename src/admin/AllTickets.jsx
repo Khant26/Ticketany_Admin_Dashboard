@@ -221,8 +221,62 @@ function AllTickets() {
     }
   };
 
-  const selectedStatusLabel =
-    STATUS_LABELS[selectedTicketStatus] || selectedTicket?.status || "—";
+  const baseStatusLabel = (ticket) => {
+    const statusKey = (ticket?.status || "").toLowerCase();
+    return STATUS_LABELS[statusKey] || ticket?.status || "—";
+  };
+
+  const formatRefundLabel = (refundStatus) => {
+    const refundKey = (refundStatus || "").toLowerCase();
+    return REFUND_LABELS[refundKey] || refundStatus || "None";
+  };
+
+  const formatStatusLabel = (ticket) => {
+    const statusKey = (ticket?.status || "").toLowerCase();
+    const label = baseStatusLabel(ticket);
+
+    if (statusKey === "cancel" && ticket?.refund_status && ticket.refund_status !== "none") {
+      return `${label} (${formatRefundLabel(ticket.refund_status)})`;
+    }
+
+    return label;
+  };
+
+  const mobileDetailFields = (ticket) => {
+    const fields = [
+      { label: "Email", value: ticket._customer_email ?? "—" },
+      { label: "Passport Name", value: ticket.passport_name ?? "—" },
+      { label: "Facebook Name", value: ticket.facebook_name ?? "—" },
+      { label: "Member Code", value: ticket.member_code ?? "—" },
+    ];
+
+    if (filter === "paid") {
+      fields.push(
+        { label: "Customer Payment", value: ticket.customer_payment ?? "—" },
+        { label: "Payment Date", value: ticket.payment_date ?? "—" }
+      );
+    }
+
+    if (filter === "complete") {
+      fields.push(
+        { label: "Selling Price", value: ticket.selling_price ?? "—" },
+        { label: "Zone", value: ticket.zone ?? "—" },
+        { label: "Row", value: ticket.row ?? "—" },
+        { label: "Seat", value: ticket.seat ?? "—" }
+      );
+    }
+
+    if (filter === "cancel") {
+      fields.push(
+        { label: "Customer Payment", value: ticket.customer_payment ?? "—" },
+        { label: "Refund", value: formatRefundLabel(ticket.refund_status) }
+      );
+    }
+
+    return fields;
+  };
+
+  const selectedStatusLabel = selectedTicket ? formatStatusLabel(selectedTicket) : "—";
 
   return (
     <div className="max-w-full mx-auto">
@@ -231,7 +285,25 @@ function AllTickets() {
       </h1>
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-col gap-1 md:hidden">
+          <label htmlFor="ticket-filter" className="text-sm font-medium text-gray-700">
+            Filter by status
+          </label>
+          <select
+            id="ticket-filter"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            className="min-w-[180px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="complete">Completed</option>
+            <option value="cancel">Cancelled</option>
+          </select>
+        </div>
+
+        <div className="hidden md:flex gap-2 flex-wrap">
           {["all", "pending", "paid", "complete", "cancel"].map((status) => (
             <button
               key={status}
@@ -283,7 +355,82 @@ function AllTickets() {
       )}
       {loading && <div className="mb-4 text-gray-600">Loading…</div>}
 
-      <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+      <div className="md:hidden space-y-3">
+        {!loading && byFilter.length === 0 ? (
+          <div className="rounded-lg border border-gray-300 bg-white px-4 py-8 text-center text-sm text-gray-500 shadow-sm">
+            No tickets in this status.
+          </div>
+        ) : (
+          byFilter.map((ticket) => (
+            <article
+              key={ticket.id}
+              className="rounded-2xl border border-gray-300 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Order ID
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-gray-900">
+                    {ticket._order_id ?? "—"}
+                  </p>
+                </div>
+
+                <span
+                  className={`inline-flex max-w-[55%] items-center rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
+                    ticket.status
+                  )}`}
+                >
+                  <span className="truncate">{baseStatusLabel(ticket)}</span>
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {mobileDetailFields(ticket).map((field) => (
+                  <div
+                    key={`${ticket.id}-${field.label}`}
+                    className="rounded-xl bg-gray-50 px-3 py-2"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                      {field.label}
+                    </p>
+                    <p className="mt-1 break-words text-sm text-gray-900">
+                      {field.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {ticket.refund_status && ticket.refund_status !== "none" ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Refund
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${refundBadgeClass(
+                      ticket.refund_status
+                    )}`}
+                  >
+                    {formatRefundLabel(ticket.refund_status)}
+                  </span>
+                </div>
+              ) : null}
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicket(ticket)}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-50"
+                >
+                  View details
+                </button>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
         <table className="min-w-[980px] w-full text-left bg-white">
           <thead className="border-b border-gray-400">
             {filter === "all" && (
@@ -460,16 +607,7 @@ function AllTickets() {
                           t.status
                         )}`}
                       >
-                        {STATUS_LABELS[(t.status || "").toLowerCase()] ||
-                          t.status ||
-                          "—"}
-                        {t.status?.toLowerCase() === "cancel" &&
-                        t.refund_status &&
-                        t.refund_status !== "none"
-                          ? ` (${t.refund_status
-                              .replace("_", " ")
-                              .replace(/\b\w/g, (l) => l.toUpperCase())})`
-                          : ""}
+                        {formatStatusLabel(t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -507,9 +645,7 @@ function AllTickets() {
                           t.status
                         )}`}
                       >
-                        {STATUS_LABELS[(t.status || "").toLowerCase()] ||
-                          t.status ||
-                          "—"}
+                        {formatStatusLabel(t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -546,9 +682,7 @@ function AllTickets() {
                           t.status
                         )}`}
                       >
-                        {STATUS_LABELS[(t.status || "").toLowerCase()] ||
-                          t.status ||
-                          "—"}
+                        {formatStatusLabel(t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -591,9 +725,7 @@ function AllTickets() {
                           t.status
                         )}`}
                       >
-                        {STATUS_LABELS[(t.status || "").toLowerCase()] ||
-                          t.status ||
-                          "—"}
+                        {formatStatusLabel(t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -645,16 +777,7 @@ function AllTickets() {
                           t.status
                         )}`}
                       >
-                        {STATUS_LABELS[(t.status || "").toLowerCase()] ||
-                          t.status ||
-                          "—"}
-                        {t.status?.toLowerCase() === "cancel" &&
-                        t.refund_status &&
-                        t.refund_status !== "none"
-                          ? ` (${t.refund_status
-                              .replace("_", " ")
-                              .replace(/\b\w/g, (l) => l.toUpperCase())})`
-                          : ""}
+                        {formatStatusLabel(t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">

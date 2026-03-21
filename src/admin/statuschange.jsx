@@ -45,6 +45,12 @@ function StatusChange() {
     cancel: "Cancelled",
   };
 
+  const REFUND_DISPLAY = {
+    none: "None",
+    in_process: "In Process",
+    refunded: "Refunded",
+  };
+
   const statusBadgeClass = (s) => {
     switch ((s || "").toLowerCase()) {
       case "pending":
@@ -58,6 +64,33 @@ function StatusChange() {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const refundBadgeClass = (s) => {
+    switch ((s || "").toLowerCase()) {
+      case "in_process":
+        return "bg-orange-100 text-orange-800";
+      case "refunded":
+        return "bg-teal-100 text-teal-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const formatRefundLabel = (refundStatus) => {
+    const refundKey = (refundStatus || "").toLowerCase();
+    return REFUND_DISPLAY[refundKey] || refundStatus || "None";
+  };
+
+  const formatStatusLabel = (ticket) => {
+    const statusKey = (ticket?.status || "").toLowerCase();
+    const baseStatus = STATUS_DISPLAY[statusKey] || ticket?.status || "—";
+
+    if (statusKey === "cancel" && ticket?.refund_status && ticket.refund_status !== "none") {
+      return `${baseStatus} (${formatRefundLabel(ticket.refund_status)})`;
+    }
+
+    return baseStatus;
   };
 
   const authHeaders = (json = false) => {
@@ -188,12 +221,136 @@ function StatusChange() {
     activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab
   );
 
+  const renderStatusActions = (ticket) => {
+    const status = (ticket.status || "").toLowerCase();
+
+    return (
+      <>
+        {status === "pending" && (
+          <button
+            onClick={() => openPaidModal(ticket)}
+            className="px-3 py-1 hover:bg-gray-100 hover:scale-105 rounded border transition-all duration-200"
+          >
+            Mark Paid
+          </button>
+        )}
+
+        {status === "paid" && (
+          <select
+            className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
+            defaultValue=""
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "pending") openConfirmPending(ticket);
+              if (v === "complete") openCompleteModal(ticket);
+              if (v === "cancel") openConfirmCancel(ticket);
+              e.target.value = "";
+            }}
+          >
+            <option value="" hidden>
+              Change status
+            </option>
+            <option value="pending">Pending</option>
+            <option value="complete">Completed</option>
+            <option value="cancel">Cancelled</option>
+          </select>
+        )}
+
+        {status === "complete" && (
+          <select
+            className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
+            defaultValue=""
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "pending") openConfirmPending(ticket);
+              if (v === "cancel") openConfirmCancel(ticket);
+              e.target.value = "";
+            }}
+          >
+            <option value="" hidden>
+              Change status
+            </option>
+            <option value="pending">Pending</option>
+            <option value="cancel">Cancelled</option>
+          </select>
+        )}
+
+        {status === "cancel" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setConfirmPending({ open: true, ticket })}
+              className="px-3 py-1 hover:bg-gray-100 hover:scale-105 rounded border transition-all duration-200"
+            >
+              Pending
+            </button>
+            <select
+              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
+              value={ticket.refund_status || "none"}
+              onChange={(e) => changeRefundStatus(ticket.id, e.target.value)}
+            >
+              <option value="none">None</option>
+              <option value="in_process">In Process</option>
+              <option value="refunded">Refunded</option>
+            </select>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderDesktopStatusActions = (ticket) => {
+    const status = (ticket.status || "").toLowerCase();
+
+    if (status === "cancel") {
+      return (
+        <select
+          className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === "pending") openConfirmPending(ticket);
+            if (v === "in_process") changeRefundStatus(ticket.id, "in_process");
+            if (v === "refunded") changeRefundStatus(ticket.id, "refunded");
+            e.target.value = "";
+          }}
+        >
+          <option value="" hidden>
+            Change Status
+          </option>
+          <option value="pending">Back to Pending</option>
+          <option value="in_process">In Process</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      );
+    }
+
+    return renderStatusActions(ticket);
+  };
+
   return (
     <div className="max-w-full mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Ticket Status Management</h1>
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-col gap-1 md:hidden">
+          <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+            Filter by status
+          </label>
+          <select
+            id="status-filter"
+            value={activeTab}
+            onChange={(event) => setActiveTab(event.target.value)}
+            className="min-w-[180px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="complete">Completed</option>
+            <option value="cancel">Cancelled</option>
+          </select>
+        </div>
+
+        <div className="hidden md:flex gap-2 flex-wrap">
           {["all", "pending", "paid", "complete", "cancel"].map((tab) => (
             <button
               key={tab}
@@ -226,7 +383,94 @@ function StatusChange() {
         <div className="mb-4 p-3 rounded bg-red-50 text-red-700">{error}</div>
       )}
 
-      <div className="overflow-x-auto shadow-sm border border-gray-300 rounded-lg">
+      <div className="md:hidden space-y-3">
+        {filteredTickets.length === 0 && !loading ? (
+          <div className="rounded-lg border border-gray-300 bg-white px-4 py-8 text-center text-sm text-gray-500 shadow-sm">
+            No tickets found.
+          </div>
+        ) : (
+          filteredTickets.map((ticket) => (
+            <article
+              key={ticket.id}
+              className="rounded-2xl border border-gray-300 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Order ID
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-gray-900">
+                    {ticket.order || "—"}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex max-w-[55%] items-center rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
+                    ticket.status
+                  )}`}
+                >
+                  <span className="truncate">{formatStatusLabel(ticket)}</span>
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Passport Name
+                  </p>
+                  <p className="mt-1 break-words text-sm text-gray-900">
+                    {ticket.passport_name || "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Facebook Name
+                  </p>
+                  <p className="mt-1 break-words text-sm text-gray-900">
+                    {ticket.facebook_name || "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Priority Date
+                  </p>
+                  <p className="mt-1 break-words text-sm text-gray-900">
+                    {ticket.priority_date || "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    1st Priority
+                  </p>
+                  <p className="mt-1 break-words text-sm text-gray-900">
+                    {ticket.fst_pt || "—"}
+                  </p>
+                </div>
+              </div>
+
+              {(ticket.status || "").toLowerCase() === "cancel" ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Refund
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${refundBadgeClass(
+                      ticket.refund_status
+                    )}`}
+                  >
+                    {formatRefundLabel(ticket.refund_status)}
+                  </span>
+                </div>
+              ) : null}
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {renderStatusActions(ticket)}
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block overflow-x-auto shadow-sm border border-gray-300 rounded-lg">
         <table className="bg-white w-full text-sm">
           <thead className=" border-b border-gray-400">
             <tr>
@@ -272,7 +516,6 @@ function StatusChange() {
                   grouped[id] = grouped[id] || [];
                   grouped[id].push(t);
                 });
-
                 return Object.keys(grouped)
                   .sort((a, b) => Number(b) - Number(a))
                   .flatMap((orderId) =>
@@ -304,88 +547,11 @@ function StatusChange() {
                               t.status
                             )}`}
                           >
-                            {STATUS_DISPLAY[(t.status || "").toLowerCase()]}
-                            {t.status?.toLowerCase() === "cancel" &&
-                            t.refund_status &&
-                            t.refund_status !== "none"
-                              ? ` (${t.refund_status
-                                  .replace("_", " ")
-                                  .replace(/\b\w/g, (l) => l.toUpperCase())})`
-                              : ""}
+                            {formatStatusLabel(t)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm space-x-2">
-                          {(t.status || "").toLowerCase() === "pending" && (
-                            <button
-                              onClick={() => openPaidModal(t)}
-                              className="px-3 py-1 hover:bg-gray-100 hover:scale-105 rounded border transition-all duration-200"
-                            >
-                              Mark Paid
-                            </button>
-                          )}
-
-                          {(t.status || "").toLowerCase() === "paid" && (
-                            <select
-                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
-                              defaultValue=""
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                if (v === "pending") openConfirmPending(t);
-                                if (v === "complete") openCompleteModal(t);
-                                if (v === "cancel") openConfirmCancel(t);
-                                e.target.value = "";
-                              }}
-                            >
-                              <option value="" hidden>
-                                Change status
-                              </option>
-                              <option value="pending">Pending</option>
-                              <option value="complete">Completed</option>
-                              <option value="cancel">Cancelled</option>
-                            </select>
-                          )}
-
-                          {(t.status || "").toLowerCase() === "complete" && (
-                            <select
-                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
-                              defaultValue=""
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                if (v === "pending") openConfirmPending(t);
-                                if (v === "cancel") openConfirmCancel(t);
-                                e.target.value = "";
-                              }}
-                            >
-                              <option value="" hidden>
-                                Change status
-                              </option>
-                              <option value="pending">Pending</option>
-                              <option value="cancel">Cancelled</option>
-                            </select>
-                          )}
-
-                          {(t.status || "").toLowerCase() === "cancel" && (
-                            <select
-                              className="border hover:bg-gray-100 hover:scale-105 transition-all duration-200 rounded px-2 py-1"
-                              defaultValue=""
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                if (v === "pending") openConfirmPending(t);
-                                if (v === "in_process")
-                                  changeRefundStatus(t.id, "in_process");
-                                if (v === "refunded")
-                                  changeRefundStatus(t.id, "refunded");
-                                e.target.value = "";
-                              }}
-                            >
-                              <option value="" hidden>
-                                Change Status
-                              </option>
-                              <option value="pending">Back to Pending</option>
-                              <option value="in_process">In Process</option>
-                              <option value="refunded">Refunded</option>
-                            </select>
-                          )}
+                          {renderDesktopStatusActions(t)}
                         </td>
                       </tr>
                     ))
