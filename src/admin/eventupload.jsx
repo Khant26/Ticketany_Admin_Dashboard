@@ -721,13 +721,19 @@ function eventupload() {
                 {/* Event name */}
                 <div className="flex items-center gap-4">
                   <label className="w-32 text-gray-700">Event name</label>
-                  <input
-                    type="text"
-                    name="event_name"
-                    value={formData.event_name}
-                    onChange={handleInputChange}
-                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="event_name"
+                      value={formData.event_name}
+                      onChange={handleInputChange}
+                      maxLength={255}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formData.event_name.length}/255 characters
+                    </div>
+                  </div>
                 </div>
 
                 {/* Date */}
@@ -777,39 +783,57 @@ function eventupload() {
                 {/* Time */}
                 <div className="flex items-center gap-4">
                   <label className="w-32 text-gray-700">Time</label>
-                  <input
-                    type="text"
-                    name="event_time"
-                    value={formData.event_time}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 18:00 - 19:00 PM"
-                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="event_time"
+                      value={formData.event_time}
+                      onChange={handleInputChange}
+                      maxLength={101}
+                      placeholder="e.g., 18:00 - 19:00 PM"
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formData.event_time.length}/101 characters
+                    </div>
+                  </div>
                 </div>
 
                 {/* Location */}
                 <div className="flex items-center gap-4">
                   <label className="w-32 text-gray-700">Location</label>
-                  <input
-                    type="text"
-                    name="event_location"
-                    value={formData.event_location}
-                    onChange={handleInputChange}
-                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="event_location"
+                      value={formData.event_location}
+                      onChange={handleInputChange}
+                      maxLength={255}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formData.event_location.length}/255 characters
+                    </div>
+                  </div>
                 </div>
 
                 {/* Sale Date */}
                 <div className="flex items-center gap-4">
                   <label className="w-32 text-gray-700">Sale Date</label>
-                  <input
-                    type="text"
-                    name="sale_date"
-                    value={formData.sale_date}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 1 DEC 2025"
-                    className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      name="sale_date"
+                      value={formData.sale_date}
+                      onChange={handleInputChange}
+                      maxLength={100}
+                      placeholder="e.g., 1 DEC 2025"
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formData.sale_date.length}/100 characters
+                    </div>
+                  </div>
                 </div>
 
                 {/* Price */}

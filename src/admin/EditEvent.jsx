@@ -492,7 +492,7 @@ function EditEvent() {
     }
   };
 
-  const InlineRow = ({ label, name, placeholder }) => (
+  const InlineRow = ({ label, name, placeholder, maxLength }) => (
     <div className="flex items-start gap-4">
       <div className="w-32 text-gray-700 pt-2">{label}</div>
       <div className="flex-1">
@@ -525,17 +525,25 @@ function EditEvent() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <input
-              autoFocus
-              type="text"
-              value={formData[name] ?? ""}
-              placeholder={placeholder}
-              onChange={(e) => handleInput(name, e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && toggleEdit(name)}
-              onBlur={() => toggleEdit(name)}
-              className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                type="text"
+                value={formData[name] ?? ""}
+                placeholder={placeholder}
+                onChange={(e) => handleInput(name, e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && toggleEdit(name)}
+                onBlur={() => toggleEdit(name)}
+                maxLength={maxLength}
+                className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+              />
+            </div>
+            {maxLength && (
+              <div className="text-xs text-gray-500">
+                {(formData[name] ?? "").length}/{maxLength} characters
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -705,6 +713,7 @@ function EditEvent() {
                 label="Event"
                 name="event_name"
                 placeholder="Event name"
+                maxLength={255}
               />
 
               {/* Date */}
@@ -754,16 +763,19 @@ function EditEvent() {
                 label="Time"
                 name="event_time"
                 placeholder="e.g, 18:00 - 19:00 PM"
+                maxLength={101}
               />
               <InlineRow
                 label="Location"
                 name="event_location"
                 placeholder="Venue or address"
+                maxLength={255}
               />
               <InlineRow
                 label="Sale Date"
                 name="sale_date"
                 placeholder="e.g, 1 July 2025 - 2 Sep 2025"
+                maxLength={100}
               />
 
               {/* Price */}
