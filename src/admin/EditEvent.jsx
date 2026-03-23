@@ -65,6 +65,7 @@ function EditEvent() {
     event_location: 15,
     event_time: 5,
     sale_date: 10,
+    ticket_price: 5,
   };
 
   // Utility function to count words
@@ -834,6 +835,9 @@ function EditEvent() {
                     >
                       Add
                     </button>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {countWords(priceInput)}/{WORD_LIMITS.ticket_price} words
                   </div>
                   {/* Display selected prices as tags */}
                   {selectedPrices.length > 0 && (
