@@ -40,6 +40,25 @@ function eventupload() {
   const API_BASE =
     import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/";
 
+  // Word limit configuration for each field
+  const WORD_LIMITS = {
+    event_name: 10,
+    event_location: 15,
+    event_time: 5,
+    sale_date: 10,
+  };
+
+  // Utility function to count words
+  const countWords = (text) => {
+    if (!text || !text.trim()) return 0;
+    return text.trim().split(/\s+/).length;
+  };
+
+  // Utility function to check if word limit is exceeded
+  const isWordLimitExceeded = (fieldName, text) => {
+    return countWords(text) > WORD_LIMITS[fieldName];
+  };
+
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const dragIndex = useRef(null);
@@ -728,10 +747,25 @@ function eventupload() {
                       value={formData.event_name}
                       onChange={handleInputChange}
                       maxLength={255}
-                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                      className={`w-full h-10 rounded-md border ${
+                        isWordLimitExceeded("event_name", formData.event_name)
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
                     />
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formData.event_name.length}/255 characters
+                    <div className="flex justify-between mt-1">
+                      <div className="text-xs text-gray-500">
+                        {formData.event_name.length}/255 characters
+                      </div>
+                      <div
+                        className={`text-xs ${
+                          isWordLimitExceeded("event_name", formData.event_name)
+                            ? "text-red-500 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {countWords(formData.event_name)}/{WORD_LIMITS.event_name} words
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -791,10 +825,25 @@ function eventupload() {
                       onChange={handleInputChange}
                       maxLength={101}
                       placeholder="e.g., 18:00 - 19:00 PM"
-                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                      className={`w-full h-10 rounded-md border ${
+                        isWordLimitExceeded("event_time", formData.event_time)
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
                     />
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formData.event_time.length}/101 characters
+                    <div className="flex justify-between mt-1">
+                      <div className="text-xs text-gray-500">
+                        {formData.event_time.length}/101 characters
+                      </div>
+                      <div
+                        className={`text-xs ${
+                          isWordLimitExceeded("event_time", formData.event_time)
+                            ? "text-red-500 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {countWords(formData.event_time)}/{WORD_LIMITS.event_time} words
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -809,10 +858,25 @@ function eventupload() {
                       value={formData.event_location}
                       onChange={handleInputChange}
                       maxLength={255}
-                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                      className={`w-full h-10 rounded-md border ${
+                        isWordLimitExceeded("event_location", formData.event_location)
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
                     />
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formData.event_location.length}/255 characters
+                    <div className="flex justify-between mt-1">
+                      <div className="text-xs text-gray-500">
+                        {formData.event_location.length}/255 characters
+                      </div>
+                      <div
+                        className={`text-xs ${
+                          isWordLimitExceeded("event_location", formData.event_location)
+                            ? "text-red-500 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {countWords(formData.event_location)}/{WORD_LIMITS.event_location} words
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -828,10 +892,25 @@ function eventupload() {
                       onChange={handleInputChange}
                       maxLength={100}
                       placeholder="e.g., 1 DEC 2025"
-                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                      className={`w-full h-10 rounded-md border ${
+                        isWordLimitExceeded("sale_date", formData.sale_date)
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
                     />
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formData.sale_date.length}/100 characters
+                    <div className="flex justify-between mt-1">
+                      <div className="text-xs text-gray-500">
+                        {formData.sale_date.length}/100 characters
+                      </div>
+                      <div
+                        className={`text-xs ${
+                          isWordLimitExceeded("sale_date", formData.sale_date)
+                            ? "text-red-500 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {countWords(formData.sale_date)}/{WORD_LIMITS.sale_date} words
+                      </div>
                     </div>
                   </div>
                 </div>

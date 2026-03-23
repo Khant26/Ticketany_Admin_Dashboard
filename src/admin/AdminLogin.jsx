@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { showSuccess, showError } from '../utils/toastNotification';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -68,7 +69,9 @@ function AdminLogin() {
         const isSuperAdmin = userInfo?.is_superuser === true;
 
         if (!isSuperAdmin) {
-          setError('Access denied. Super admin privileges required.');
+          const errorMsg = 'Access denied. Super admin privileges required.';
+          setError(errorMsg);
+          showError(errorMsg);
           return;
         }
 
@@ -79,12 +82,17 @@ function AdminLogin() {
         localStorage.setItem('user_data', JSON.stringify(userInfo));
         localStorage.setItem('is_admin', 'true');
 
+        showSuccess(`Welcome! You've successfully signed in as admin.`);
         navigate('/admin');
       } else {
-        setError(data.error || data.detail || data.message || 'Authentication failed');
+        const errorMsg = data.error || data.detail || data.message || 'Authentication failed';
+        setError(errorMsg);
+        showError(errorMsg);
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      const errorMsg = 'Network error. Please try again.';
+      setError(errorMsg);
+      showError(errorMsg);
     } finally {
       setLoading(false);
     }

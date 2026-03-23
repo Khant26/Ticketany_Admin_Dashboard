@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { showSessionExpired } from '../utils/toastNotification';
 
 function AdminAuthGuard({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -26,11 +27,16 @@ function AdminAuthGuard({ children }) {
         } else {
           setIsAuthenticated(false);
           setIsAdmin(false);
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_data');
+          showSessionExpired();
         }
       } catch (error) {
         console.error('Auth check error:', error);
         setIsAuthenticated(false);
         setIsAdmin(false);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_data');
       }
     };
 

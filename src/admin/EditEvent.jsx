@@ -59,6 +59,25 @@ function EditEvent() {
   const IMAGE_SEPARATOR = "|||SEPARATOR|||";
   const MAX_FILES = 10;
 
+  // Word limit configuration for each field
+  const WORD_LIMITS = {
+    event_name: 10,
+    event_location: 15,
+    event_time: 5,
+    sale_date: 10,
+  };
+
+  // Utility function to count words
+  const countWords = (text) => {
+    if (!text || !text.trim()) return 0;
+    return text.trim().split(/\s+/).length;
+  };
+
+  // Utility function to check if word limit is exceeded
+  const isWordLimitExceeded = (fieldName, text) => {
+    return countWords(text) > WORD_LIMITS[fieldName];
+  };
+
   // Inline edit state per field
   const [editing, setEditing] = useState({
     event_name: false,
@@ -536,14 +555,31 @@ function EditEvent() {
                 onKeyDown={(e) => e.key === "Enter" && toggleEdit(name)}
                 onBlur={() => toggleEdit(name)}
                 maxLength={maxLength}
-                className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
+                className={`flex-1 h-10 rounded-md border ${
+                  isWordLimitExceeded(name, formData[name] ?? "")
+                    ? "border-red-500"
+                    : "border-gray-300"
+                } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
               />
             </div>
-            {maxLength && (
-              <div className="text-xs text-gray-500">
-                {(formData[name] ?? "").length}/{maxLength} characters
-              </div>
-            )}
+            <div className="flex justify-between">
+              {maxLength && (
+                <div className="text-xs text-gray-500">
+                  {(formData[name] ?? "").length}/{maxLength} characters
+                </div>
+              )}
+              {WORD_LIMITS[name] && (
+                <div
+                  className={`text-xs ${
+                    isWordLimitExceeded(name, formData[name] ?? "")
+                      ? "text-red-500 font-semibold"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {countWords(formData[name] ?? "")}/{WORD_LIMITS[name]} words
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

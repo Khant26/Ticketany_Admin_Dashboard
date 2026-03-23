@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import { showError, showSessionExpired } from "../utils/toastNotification";
 
 const AuthContext = createContext();
 
@@ -28,8 +29,12 @@ const AuthContextProvider = ({ children}) => {
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("user_data");
                 setUser(null);
+                showSessionExpired();
             } else {
                 console.error('Error fetching user:', error);
+                if (error.response?.status >= 500) {
+                    showError("Server error. Please try again later.");
+                }
             }
         }
     }
@@ -66,6 +71,7 @@ const AuthContextProvider = ({ children}) => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user_data");
         setUser(null);
+        showSessionExpired();
     }
 
     useEffect(() => {
