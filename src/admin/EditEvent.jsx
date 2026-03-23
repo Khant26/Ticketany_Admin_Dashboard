@@ -547,14 +547,8 @@ function EditEvent() {
                 className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
               />
             </div>
-            <div className="flex justify-between">
-              {maxLength && (
-                <div className="text-xs text-gray-500">
-                  {CHAR_LIMITS[name] && (
-                <div className="text-xs text-gray-500">
-                  {(formData[name] ?? "").length}/{CHAR_LIMITS[name]} characters
-                </div>
-              )}
+            <div className="mt-1 text-xs text-gray-500">
+              {CHAR_LIMITS[name] && `${(formData[name] ?? "").length}/${CHAR_LIMITS[name]} characters`}
             </div>
           </div>
         )}
