@@ -60,23 +60,18 @@ function EditEvent() {
   const MAX_FILES = 10;
 
   // Word limit configuration for each field
-  const WORD_LIMITS = {
-    event_name: 10,
-    event_location: 15,
-    event_time: 5,
-    sale_date: 10,
+  const WORD_LIMITS = {};
+
+  // Character limits for fields
+  const CHAR_LIMITS = {
+    event_name: 255,
+    event_location: 255,
+    event_time: 101,
+    sale_date: 100,
   };
 
-  // Utility function to count words
-  const countWords = (text) => {
-    if (!text || !text.trim()) return 0;
-    return text.trim().split(/\s+/).length;
-  };
-
-  // Utility function to check if word limit is exceeded
-  const isWordLimitExceeded = (fieldName, text) => {
-    return countWords(text) > WORD_LIMITS[fieldName];
-  };
+  // Utility function to count characters
+  const countCharacters = (text) => text ? text.length : 0;
 
   // Inline edit state per field
   const [editing, setEditing] = useState({
@@ -565,18 +560,9 @@ function EditEvent() {
             <div className="flex justify-between">
               {maxLength && (
                 <div className="text-xs text-gray-500">
-                  {(formData[name] ?? "").length}/{maxLength} characters
-                </div>
-              )}
-              {WORD_LIMITS[name] && (
-                <div
-                  className={`text-xs ${
-                    isWordLimitExceeded(name, formData[name] ?? "")
-                      ? "text-red-500 font-semibold"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {countWords(formData[name] ?? "")}/{WORD_LIMITS[name]} words
+                  {CHAR_LIMITS[name] && (
+                <div className="text-xs text-gray-500">
+                  {(formData[name] ?? "").length}/{CHAR_LIMITS[name]} characters
                 </div>
               )}
             </div>
