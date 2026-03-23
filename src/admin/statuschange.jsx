@@ -222,10 +222,7 @@ function StatusChange() {
   const filteredTickets = tickets.filter((t) => {
     const matchesStatus = activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab;
     const matchesSearch = searchTerm === "" || 
-      String(t.event || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(t.order || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.passport_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.facebook_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+      String(t.event_name || "").toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesStatus && matchesSearch;
   });
@@ -344,7 +341,7 @@ function StatusChange() {
         <div className="w-full md:w-auto">
           <input
             type="text"
-            placeholder="Search by event, order ID, or name..."
+            placeholder="Search by event name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full md:w-64 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 shadow-sm focus:border-gray-400 focus:outline-none"
