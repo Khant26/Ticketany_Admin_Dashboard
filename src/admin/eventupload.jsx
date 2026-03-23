@@ -87,25 +87,16 @@ function eventupload() {
   const fetchCategories = async () => {
     try {
       const url = `${API_BASE}categories/`;
-      console.log("Fetching categories from:", url);
       const response = await fetch(url, {
         headers: authHeaders(),
       });
-      console.log("Categories response status:", response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log("Categories fetched successfully:", data);
         setCategories(data);
         // Set first category as default if no category is selected
         if (data.length > 0 && !formData.category) {
           setFormData((prev) => ({ ...prev, category: data[0].id }));
         }
-      } else {
-        const errorText = await response.text();
-        console.error(
-          `Failed to fetch categories. Status: ${response.status}`,
-          errorText,
-        );
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -117,14 +108,11 @@ function eventupload() {
     setFetchingEvents(true);
     try {
       const url = `${API_BASE}events/`;
-      console.log("Fetching events from:", url);
       const response = await fetch(url, {
         headers: authHeaders(),
       });
-      console.log("Events response status:", response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log("Events fetched successfully:", data);
         setEvents(data);
       } else {
         const errorText = await response.text();

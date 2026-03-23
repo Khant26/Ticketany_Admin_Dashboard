@@ -76,11 +76,9 @@ function AddNewEvents() {
   };
 
   const handleDateKeyDown = (e) => {
-    console.log("Key pressed:", e.key, "Input value:", dateInput); // Debug
     if (e.key === "Enter" && dateInput.trim()) {
       e.preventDefault();
       const newDate = dateInput.trim();
-      console.log("Adding date:", newDate); // Debug
       setSelectedDates((prev) => [...prev, newDate]);
       setDateInput("");
     }
@@ -89,7 +87,6 @@ function AddNewEvents() {
   const handleAddDate = () => {
     if (dateInput.trim()) {
       const newDate = dateInput.trim();
-      console.log("Adding date via button:", newDate); // Debug
       setSelectedDates((prev) => [...prev, newDate]);
       setDateInput("");
     }
@@ -427,7 +424,6 @@ function AddNewEvents() {
                       type="text"
                       value={dateInput}
                       onChange={(e) => {
-                        console.log("Input changed to:", e.target.value);
                         setDateInput(e.target.value);
                       }}
                       onKeyDown={handleDateKeyDown}
@@ -437,7 +433,6 @@ function AddNewEvents() {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log("Add button clicked! Current dateInput:", dateInput);
                         handleAddDate();
                       }}
                       className="px-4 h-10 bg-[#f28fa5] text-white rounded-md hover:bg-[#f28fa5]/90 font-medium"
@@ -461,7 +456,6 @@ function AddNewEvents() {
                           <button
                             type="button"
                             onClick={() => {
-                              console.log("Removing date at index:", index);
                               removeDateTag(index);
                             }}
                             className="text-white hover:text-gray-200 font-bold"

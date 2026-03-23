@@ -25,7 +25,6 @@ const AuthContextProvider = ({ children}) => {
         } catch (error) {
             // Handle authentication errors
             if (error.response?.status === 401) {
-                console.log('Unauthenticated - invalid token');
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("user_data");
                 setUser(null);
@@ -87,8 +86,6 @@ const AuthContextProvider = ({ children}) => {
             }
         }
     }, [])
-
-    console.log(user)
 
     return (
         <AuthContext.Provider value={{ user, getUser, login, logout, loading }}>{children}</AuthContext.Provider>
