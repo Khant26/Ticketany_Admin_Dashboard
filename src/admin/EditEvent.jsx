@@ -59,9 +59,6 @@ function EditEvent() {
   const IMAGE_SEPARATOR = "|||SEPARATOR|||";
   const MAX_FILES = 10;
 
-  // Word limit configuration for each field
-  const WORD_LIMITS = {};
-
   // Character limits for fields
   const CHAR_LIMITS = {
     event_name: 255,
