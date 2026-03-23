@@ -161,7 +161,7 @@ function Sidebar() {
                 onClick={handleCloseSidebar}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 text-sm rounded-lg transition-colors
-       ${isActive ? " font-semibold text-[#ee6786ff]" : "hover:bg-gray-200"}`
+       ${isActive ? " font-semibold text-[#f28fa5]" : "hover:bg-gray-200"}`
                 }
                 title="Dashboard"
               >
@@ -192,7 +192,7 @@ function Sidebar() {
                 onClick={handleCloseSidebar}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 text-sm rounded-lg transition-colors 
-       ${isActive ? " font-semibold text-[#ee6786ff]" : "hover:bg-gray-200"}`
+       ${isActive ? " font-semibold text-[#f28fa5]" : "hover:bg-gray-200"}`
                 }
                 title="Status Change"
               >
@@ -217,7 +217,7 @@ function Sidebar() {
                 onClick={handleCloseSidebar}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 text-sm rounded-lg transition-colors 
-       ${isActive ? " font-semibold text-[#ee6786ff]" : "hover:bg-gray-200"}`
+       ${isActive ? " font-semibold text-[#f28fa5]" : "hover:bg-gray-200"}`
                 }
                 title="Event Management"
               >
@@ -242,7 +242,7 @@ function Sidebar() {
                 onClick={handleCloseSidebar}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 text-sm rounded-lg transition-colors 
-       ${isActive ? " font-semibold text-[#ee6786ff]" : "hover:bg-gray-200"}`
+       ${isActive ? " font-semibold text-[#f28fa5]" : "hover:bg-gray-200"}`
                 }
                 title="Banner Management"
               >
@@ -267,7 +267,7 @@ function Sidebar() {
                 onClick={handleCloseSidebar}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 text-sm rounded-lg transition-colors 
-       ${isActive ? " font-semibold text-[#ee6786ff]" : "hover:bg-gray-200"}`
+       ${isActive ? " font-semibold text-[#f28fa5]" : "hover:bg-gray-200"}`
                 }
                 title="Category Management"
               >

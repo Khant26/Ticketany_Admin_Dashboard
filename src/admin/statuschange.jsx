@@ -38,6 +38,8 @@ function StatusChange() {
     ticket: null,
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const STATUS_DISPLAY = {
     pending: "Pending",
     paid: "Paid",
@@ -217,9 +219,16 @@ function StatusChange() {
     loadTickets();
   };
 
-  const filteredTickets = tickets.filter((t) =>
-    activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab
-  );
+  const filteredTickets = tickets.filter((t) => {
+    const matchesStatus = activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab;
+    const matchesSearch = searchTerm === "" || 
+      String(t.event || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(t.order || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.passport_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.facebook_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesStatus && matchesSearch;
+  });
 
   const renderStatusActions = (ticket) => {
     const status = (ticket.status || "").toLowerCase();
@@ -332,6 +341,16 @@ function StatusChange() {
       <h1 className="text-2xl font-semibold mb-4">Ticket Status Management</h1>
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="w-full md:w-auto">
+          <input
+            type="text"
+            placeholder="Search by event, order ID, or name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:w-64 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 shadow-sm focus:border-gray-400 focus:outline-none"
+          />
+        </div>
+
         <div className="flex flex-col gap-1 md:hidden">
           <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
             Filter by status
@@ -596,7 +615,7 @@ function StatusChange() {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all transition-duration-200"
+                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all transition-duration-200"
                 onClick={submitPaid}
               >
                 Save
@@ -650,7 +669,7 @@ function StatusChange() {
 
               <button
                 type="submit"
-                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
+                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
               >
                 Save
               </button>
@@ -672,7 +691,7 @@ function StatusChange() {
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
+                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
                 onClick={revertToPending}
               >
                 Yes
@@ -698,7 +717,7 @@ function StatusChange() {
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 transition-all duration-200"
+                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
                 onClick={submitCancel}
               >
                 Yes, Cancel Ticket

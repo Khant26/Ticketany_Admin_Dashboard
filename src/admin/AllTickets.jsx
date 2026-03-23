@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FiDownload, FiRefreshCw, FiX } from "react-icons/fi";
+import { FiRefreshCw, FiX } from "react-icons/fi";
 
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/';
@@ -10,7 +10,6 @@ function AllTickets() {
   const [customers, setCustomers] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -58,44 +57,6 @@ function AllTickets() {
     }
   };
 
-  const exportTicketsCsv = async () => {
-    setExporting(true);
-    setError("");
-    try {
-      const res = await fetch(`${API_BASE}tickets/export_csv/`, {
-        method: "GET",
-        headers: {
-          ...authHeaders(),
-        },
-        credentials: "omit",
-      });
-
-      if (!res.ok) throw new Error(`Failed to export CSV (${res.status})`);
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const disposition = res.headers?.get?.("content-disposition") || "";
-      const match = disposition.match(/filename\*=UTF-8''([^;]+)|filename=([^;]+)/i);
-      const rawName = (match?.[1] || match?.[2] || "").trim();
-      const fileName = rawName
-        ? decodeURIComponent(rawName.replace(/^"|"$/g, ""))
-        : `tickets_export_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (e) {
-      setError(e.message || "Unable to export CSV");
-    } finally {
-      setExporting(false);
-    }
-  };
 
   useEffect(() => {
     loadAll();
@@ -325,26 +286,14 @@ function AllTickets() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={exportTicketsCsv}
-            disabled={exporting || loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-sm bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Export all tickets to CSV"
-          >
-            <FiDownload size={16} />
-            {exporting ? "Exporting…" : "Export"}
-          </button>
-
-          <button
-            onClick={loadAll}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-sm bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FiRefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            {loading ? "Refreshing…" : "Refresh"}
-          </button>
-        </div>
+        <button
+          onClick={loadAll}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-sm bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <FiRefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          {loading ? "Refreshing…" : "Refresh"}
+        </button>
 
       </div>
 

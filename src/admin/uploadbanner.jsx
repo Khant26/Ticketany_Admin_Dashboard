@@ -133,7 +133,7 @@ function UploadBanner() {
                 {!previewUrl ? (
                   <label
                     htmlFor="banner-upload"
-                    className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#ee6786]"
+                    className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#f28fa5]"
                   >
                     <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
                       +
@@ -178,7 +178,7 @@ function UploadBanner() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-3/4 rounded-lg border border-gray-300 px-3 py-3 text-sm
-      focus:ring-2 focus:ring-[#ee6786]/30 focus:border-[#ee6786] outline-none"
+      focus:ring-2 focus:ring-[#f28fa5]/30 focus:border-[#f28fa5] outline-none"
               />
 
               {error && (
@@ -191,8 +191,8 @@ function UploadBanner() {
                 disabled={isUploading}
                 className={`w-3/4 rounded-lg py-3 text-sm font-semibold text-white transition ${
                   isUploading
-                    ? "bg-[#ee6786]/60 cursor-not-allowed"
-                    : "bg-[#ee6786] hover:bg-[#d45573]"
+                    ? "bg-[#f28fa5]/60 cursor-not-allowed"
+                    : "bg-[#f28fa5] hover:bg-[#d45573]"
                 }`}
               >
                 {isUploading ? "Uploading..." : "Upload Banner"}

@@ -908,8 +908,8 @@ function eventupload() {
                       disabled={!formData.event_name.trim() || loading}
                       className={`w-full h-11 rounded-md text-white font-medium transition ${
                         !formData.event_name.trim() || loading
-                          ? "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90 cursor-default"
-                          : "bg-[#ee6786ff] hover:bg-[#ee6786ff]/90"
+                          ? "bg-[#f28fa5] hover:bg-[#f28fa5]/90 cursor-default"
+                          : "bg-[#f28fa5] hover:bg-[#f28fa5]/90"
                       }`}
                     >
                       {loading ? "Creating Event..." : "Create Event"}

@@ -479,7 +479,7 @@ function adminProfile() {
               </div>
             </div>
             <div className="flex-1 flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-black relative pb-2 after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[#ee6786ff]">
+              <h1 className="text-2xl font-semibold text-black relative pb-2 after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[#f28fa5]">
                 Admin
               </h1>
             </div>
@@ -507,11 +507,11 @@ function adminProfile() {
               </button>
             ))}
             <div
-              className="absolute bottom-0 h-[2px] bg-[#ee6786ff] rounded transition-all duration-300"
+              className="absolute bottom-0 h-[2px] bg-[#f28fa5] rounded transition-all duration-300"
               style={{ width: underlineStyle.width, left: underlineStyle.left }}
             />
           </div>
-          <div className="border-b border-[#ee6786ff]" />
+          <div className="border-b border-[#f28fa5]" />
         </div>
 
         {/* Content */}
