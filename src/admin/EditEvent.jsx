@@ -70,9 +70,6 @@ function EditEvent() {
     sale_date: 100,
   };
 
-  // Utility function to count characters
-  const countCharacters = (text) => text ? text.length : 0;
-
   // Inline edit state per field
   const [editing, setEditing] = useState({
     event_name: false,
