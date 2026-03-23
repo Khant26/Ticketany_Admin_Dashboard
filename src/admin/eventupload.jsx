@@ -718,11 +718,7 @@ function eventupload() {
                       value={formData.event_name}
                       onChange={handleInputChange}
                       maxLength={255}
-                      className={`w-full h-10 rounded-md border ${
-                        isWordLimitExceeded("event_name", formData.event_name)
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
                     />
                     <div className="flex justify-between mt-1">
                       <div className="text-xs text-gray-500">
@@ -787,19 +783,10 @@ function eventupload() {
                       onChange={handleInputChange}
                       maxLength={101}
                       placeholder="e.g., 18:00 - 19:00 PM"
-                      className={`w-full h-10 rounded-md border ${
-                        isWordLimitExceeded("event_time", formData.event_time)
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
                     />
-                    <div className="flex justify-between mt-1">
-                      <div className="text-xs text-gray-500">
-                        {formData.event_time.length}/101 characters
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formData.event_time.length}/101 characters
-                      </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {formData.event_time.length}/101 characters
                     </div>
                   </div>
                 </div>
@@ -814,19 +801,10 @@ function eventupload() {
                       value={formData.event_location}
                       onChange={handleInputChange}
                       maxLength={255}
-                      className={`w-full h-10 rounded-md border ${
-                        isWordLimitExceeded("event_location", formData.event_location)
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
                     />
-                    <div className="flex justify-between mt-1">
-                      <div className="text-xs text-gray-500">
-                        {formData.event_location.length}/255 characters
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formData.event_location.length}/255 characters
-                      </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {formData.event_location.length}/255 characters
                     </div>
                   </div>
                 </div>
@@ -842,19 +820,10 @@ function eventupload() {
                       onChange={handleInputChange}
                       maxLength={100}
                       placeholder="e.g., 1 DEC 2025"
-                      className={`w-full h-10 rounded-md border ${
-                        isWordLimitExceeded("sale_date", formData.sale_date)
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
+                      className="w-full h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
                     />
-                    <div className="flex justify-between mt-1">
-                      <div className="text-xs text-gray-500">
-                        {formData.sale_date.length}/100 characters
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formData.sale_date.length}/100 characters
-                      </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {formData.sale_date.length}/100 characters
                     </div>
                   </div>
                 </div>

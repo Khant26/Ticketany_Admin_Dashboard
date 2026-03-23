@@ -550,11 +550,7 @@ function EditEvent() {
                 onKeyDown={(e) => e.key === "Enter" && toggleEdit(name)}
                 onBlur={() => toggleEdit(name)}
                 maxLength={maxLength}
-                className={`flex-1 h-10 rounded-md border ${
-                  isWordLimitExceeded(name, formData[name] ?? "")
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]`}
+                className="flex-1 h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-[#f28fa5]"
               />
             </div>
             <div className="flex justify-between">
