@@ -1,5 +1,13 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import {
+    clearAdminSession,
+    getAdminAccessToken,
+    getStoredAdminUser,
+    hasAdminPrivileges,
+    isTokenExpired,
+    notifyAdminAuthChanged,
+} from "../services/adminSession";
 import { showError, showSessionExpired } from "../utils/toastNotification";
 
 const AuthContext = createContext();
@@ -25,10 +33,10 @@ const AuthContextProvider = ({ children}) => {
         } catch (error) {
             // Handle authentication errors
             if (error.response?.status === 401) {
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("user_data");
+                clearAdminSession();
                 setUser(null);
                 showSessionExpired();
+                notifyAdminAuthChanged({ reason: 'expired' });
             } else {
                 console.error('Error fetching user:', error);
                 if (error.response?.status >= 500) {
@@ -49,9 +57,13 @@ const AuthContextProvider = ({ children}) => {
             
             if (response.status === 200 && (response.data.access_token || response.data.token || response.data.access)) {
                 const token = response.data.access_token || response.data.token || response.data.access;
+                const refresh = response.data.refresh_token || response.data.refresh;
                 localStorage.setItem('access_token', token);
+                if (refresh) localStorage.setItem('refresh_token', refresh);
                 localStorage.setItem('user_data', JSON.stringify(response.data));
+                localStorage.setItem('is_admin', response.data?.is_superuser || response.data?.is_staff ? 'true' : 'false');
                 setUser(response.data);
+                notifyAdminAuthChanged({ reason: 'login' });
                 return { success: true, data: response.data };
             } else {
                 return { success: false, error: 'Login failed. Please check your credentials.' };
@@ -67,23 +79,19 @@ const AuthContextProvider = ({ children}) => {
     }
 
     let logout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_data");
+        clearAdminSession();
         setUser(null);
         showSessionExpired();
+        notifyAdminAuthChanged({ reason: 'logout' });
     }
 
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        const userData = localStorage.getItem('user_data');
-        if (token && userData) {
-            try {
-                setUser(JSON.parse(userData));
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('user_data');
-            }
+        const token = getAdminAccessToken();
+        const userData = getStoredAdminUser();
+        if (token && userData && hasAdminPrivileges(userData) && !isTokenExpired(token)) {
+            setUser(userData);
+        } else if (token || userData) {
+            clearAdminSession();
         }
     }, [])
 

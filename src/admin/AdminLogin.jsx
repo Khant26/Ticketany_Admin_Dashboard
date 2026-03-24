@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '../utils/toastNotification';
+import { notifyAdminAuthChanged } from '../services/adminSession';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -42,6 +43,7 @@ function AdminLogin() {
       if (response.ok) {
         // Normalize token and user payload
         const token = data.access_token || data.token || data.access || null;
+        const refresh = data.refresh_token || data.refresh || null;
 
         // Try to read flags from response; if missing, fetch current user with token
         let userInfo = data.user ?? data;
@@ -79,8 +81,12 @@ function AdminLogin() {
         if (token) {
           localStorage.setItem('access_token', token);
         }
+        if (refresh) {
+          localStorage.setItem('refresh_token', refresh);
+        }
         localStorage.setItem('user_data', JSON.stringify(userInfo));
         localStorage.setItem('is_admin', 'true');
+        notifyAdminAuthChanged({ reason: 'login' });
 
         showSuccess(`Welcome! You've successfully signed in as admin.`);
         navigate('/admin');

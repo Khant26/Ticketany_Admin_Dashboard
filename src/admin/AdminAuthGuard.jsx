@@ -1,46 +1,113 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { showSessionExpired } from '../utils/toastNotification';
+import {
+  ADMIN_AUTH_CHANGED_EVENT,
+  clearAdminSession,
+  getAdminAccessToken,
+  getStoredAdminUser,
+  getTokenExpiryDelay,
+  hasAdminPrivileges,
+  isTokenExpired,
+  verifyAdminSessionWithServer,
+} from '../services/adminSession';
 
 function AdminAuthGuard({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        const userData = localStorage.getItem('user_data');
-        const adminFlag = localStorage.getItem('is_admin');
+    let expiryTimeoutId;
 
-        if (!token || !userData) {
-          setIsAuthenticated(false);
-          return;
-        }
-
-        const parsed = JSON.parse(userData);
-
-        // Check if user is super admin or staff
-        if (parsed.is_superuser || parsed.is_staff || adminFlag === 'true') {
-          setIsAuthenticated(true);
-          setIsAdmin(true);
-        } else {
-          setIsAuthenticated(false);
-          setIsAdmin(false);
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('user_data');
-          showSessionExpired();
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setIsAuthenticated(false);
-        setIsAdmin(false);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('user_data');
+    const invalidateSession = (showToast = true) => {
+      clearAdminSession();
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      if (showToast) {
+        showSessionExpired();
       }
     };
 
-    checkAuth();
+    const scheduleExpiryLogout = (token) => {
+      window.clearTimeout(expiryTimeoutId);
+      const delay = getTokenExpiryDelay(token);
+      if (delay <= 0) {
+        invalidateSession(true);
+        return;
+      }
+
+      expiryTimeoutId = window.setTimeout(() => {
+        invalidateSession(true);
+      }, delay);
+    };
+
+    const checkAuth = async (showToast = false) => {
+      try {
+        const token = getAdminAccessToken();
+        const userData = getStoredAdminUser();
+
+        if (!token || !userData) {
+          setIsAuthenticated(false);
+          setIsAdmin(false);
+          return;
+        }
+
+        // Check if user is super admin or staff
+        if (!hasAdminPrivileges(userData)) {
+          invalidateSession(showToast);
+          return;
+        }
+
+        if (isTokenExpired(token)) {
+          invalidateSession(showToast);
+          return;
+        }
+
+        const verified = await verifyAdminSessionWithServer(token);
+        if (!verified) {
+          invalidateSession(showToast);
+          return;
+        }
+
+        setIsAuthenticated(true);
+        setIsAdmin(true);
+        scheduleExpiryLogout(token);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        invalidateSession(showToast);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void checkAuth(true);
+      }
+    };
+
+    const handleFocus = () => {
+      void checkAuth(true);
+    };
+
+    const handleAuthChanged = () => {
+      void checkAuth(false);
+    };
+
+    const validationIntervalId = window.setInterval(() => {
+      void checkAuth(true);
+    }, 30000);
+
+    void checkAuth(false);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener(ADMIN_AUTH_CHANGED_EVENT, handleAuthChanged);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(validationIntervalId);
+      window.clearTimeout(expiryTimeoutId);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener(ADMIN_AUTH_CHANGED_EVENT, handleAuthChanged);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Show loading while checking authentication

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, NavLink } from "react-router";
 import logo from "../assets/logo.jpg";
+import { clearAdminSession, notifyAdminAuthChanged } from "../services/adminSession";
 
 
 const SIDEBAR_WIDTH = "16rem"; // Tailwind w-64
@@ -82,9 +83,8 @@ function Sidebar() {
 
   const handleLogout = () => {
     // Clear all authentication data
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_data");
-    localStorage.removeItem("is_admin");
+    clearAdminSession();
+    notifyAdminAuthChanged({ reason: 'logout' });
 
     // Redirect to login page
     navigate("/admin/login");
