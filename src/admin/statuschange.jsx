@@ -2,6 +2,22 @@ import React, { useState, useEffect } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/';
+const ACTIVE_SUBMIT_COLOR = '#e05680';
+const INACTIVE_SUBMIT_COLOR = '#f7c7d4';
+const createPayModalState = () => ({
+  open: false,
+  ticket: null,
+  customer_payment: "",
+  payment_date: "",
+});
+const createCompleteModalState = () => ({
+  open: false,
+  ticket: null,
+  selling_price: "",
+  zone: "",
+  row: "",
+  seat: "",
+});
 
 function StatusChange() {
   useEffect(() => {
@@ -12,21 +28,9 @@ function StatusChange() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  const [payModal, setPayModal] = useState({
-    open: false,
-    ticket: null,
-    customer_payment: "",
-    payment_date: "",
-  });
+  const [payModal, setPayModal] = useState(createPayModalState);
 
-  const [completeModal, setCompleteModal] = useState({
-    open: false,
-    ticket: null,
-    selling_price: "",
-    zone: "",
-    row: "",
-    seat: "",
-  });
+  const [completeModal, setCompleteModal] = useState(createCompleteModalState);
 
   const [confirmPending, setConfirmPending] = useState({
     open: false,
@@ -39,6 +43,14 @@ function StatusChange() {
   });
 
   const [searchTerm, setSearchTerm] = useState("");
+  const isPayModalReady =
+    (payModal.customer_payment || "").trim().length > 0 &&
+    (payModal.payment_date || "").trim().length > 0;
+  const isCompleteModalReady =
+    (completeModal.selling_price || "").trim().length > 0 &&
+    (completeModal.zone || "").trim().length > 0 &&
+    (completeModal.row || "").trim().length > 0 &&
+    (completeModal.seat || "").trim().length > 0;
 
   const STATUS_DISPLAY = {
     pending: "Pending",
@@ -138,20 +150,16 @@ function StatusChange() {
 
   const openPaidModal = (t) =>
     setPayModal({
+      ...createPayModalState(),
       open: true,
       ticket: t,
-      customer_payment: "",
-      payment_date: "",
     });
 
   const openCompleteModal = (t) =>
     setCompleteModal({
+      ...createCompleteModalState(),
       open: true,
       ticket: t,
-      selling_price: "",
-      zone: "",
-      row: "",
-      seat: "",
     });
 
   const openConfirmPending = (t) =>
@@ -160,16 +168,20 @@ function StatusChange() {
   const openConfirmCancel = (t) => setConfirmCancel({ open: true, ticket: t });
 
   const submitPaid = async () => {
+    if (!isPayModalReady || !payModal.ticket) return;
+
     await patchTicket(payModal.ticket.id, {
       status: "paid",
       customer_payment: payModal.customer_payment,
       payment_date: payModal.payment_date,
     });
-    setPayModal({ open: false, ticket: null });
+    setPayModal(createPayModalState());
     loadTickets();
   };
 
   const submitCompleted = async () => {
+    if (!isCompleteModalReady || !completeModal.ticket) return;
+
     try {
       await patchTicket(completeModal.ticket.id, {
         status: "complete",
@@ -178,7 +190,7 @@ function StatusChange() {
         row: completeModal.row,
         seat: completeModal.seat,
       });
-      setCompleteModal({ open: false, ticket: null });
+      setCompleteModal(createCompleteModalState());
       loadTickets();
     } catch (e) {
       console.error("Error updating ticket:", e);
@@ -607,12 +619,18 @@ function StatusChange() {
             <div className="flex justify-end gap-2 ">
               <button
                 className=" border px-4 py-2 hover:bg-gray-100 transition-all transition-duration-200"
-                onClick={() => setPayModal({ open: false, ticket: null })}
+                onClick={() => setPayModal(createPayModalState())}
               >
                 Cancel
               </button>
               <button
+                disabled={!isPayModalReady}
                 className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all transition-duration-200"
+                style={{
+                  backgroundColor: isPayModalReady
+                    ? ACTIVE_SUBMIT_COLOR
+                    : INACTIVE_SUBMIT_COLOR,
+                }}
                 onClick={submitPaid}
               >
                 Save
@@ -659,14 +677,20 @@ function StatusChange() {
               <button
                 type="button"
                 className="border px-4 py-2 hover:bg-gray-100 transition-all duration-200"
-                onClick={() => setCompleteModal({ open: false, ticket: null })}
+                onClick={() => setCompleteModal(createCompleteModalState())}
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
+                disabled={!isCompleteModalReady}
+                className="px-4 py-2 text-white transition-all duration-200 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: isCompleteModalReady
+                    ? ACTIVE_SUBMIT_COLOR
+                    : INACTIVE_SUBMIT_COLOR,
+                }}
               >
                 Save
               </button>
@@ -688,7 +712,10 @@ function StatusChange() {
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
+                className="px-4 py-2 text-white transition-all duration-200"
+                style={{
+                  backgroundColor: ACTIVE_SUBMIT_COLOR,
+                }}
                 onClick={revertToPending}
               >
                 Yes
@@ -714,7 +741,10 @@ function StatusChange() {
                 No
               </button>
               <button
-                className="px-4 py-2 text-white bg-[#f28fa5] hover:bg-[#f28fa5]/90 transition-all duration-200"
+                className="px-4 py-2 text-white transition-all duration-200"
+                style={{
+                  backgroundColor: ACTIVE_SUBMIT_COLOR,
+                }}
                 onClick={submitCancel}
               >
                 Yes, Cancel Ticket
