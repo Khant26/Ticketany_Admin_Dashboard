@@ -22,6 +22,7 @@ const createCompleteModalState = () => ({
 function StatusChange() {
   useEffect(() => {
     loadTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tickets are loaded once on mount
   }, []);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -198,11 +199,6 @@ function StatusChange() {
     }
   };
 
-  const markCancelled = async (t) => {
-    await patchTicket(t.id, { status: "cancel", refund_status: "in_process" });
-    loadTickets();
-  };
-
   const revertToPending = async () => {
     const t = confirmPending.ticket;
     if (!t) return;
@@ -233,9 +229,9 @@ function StatusChange() {
 
   const filteredTickets = tickets.filter((t) => {
     const matchesStatus = activeTab === "all" ? true : (t.status || "").toLowerCase() === activeTab;
-    const matchesSearch = searchTerm === "" || 
+    const matchesSearch = searchTerm === "" ||
       String(t.event_name || "").toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesStatus && matchesSearch;
   });
 

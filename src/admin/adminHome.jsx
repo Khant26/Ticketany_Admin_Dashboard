@@ -6,7 +6,7 @@ import { FiEye, FiEyeOff, FiLoader } from "react-icons/fi";
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/";
 
-function adminHome() {
+function AdminHome() {
   const [activeTab, setActiveTab] = useState("tickets");
   const [customers, setCustomers] = useState([]);
   const [events, setEvents] = useState([]);
@@ -139,6 +139,7 @@ function adminHome() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load the initial dashboard data once
   }, []);
 
   const toggleEventHide = async (eventId) => {
@@ -563,4 +564,4 @@ function adminHome() {
   );
 }
 
-export default adminHome;
+export default AdminHome;

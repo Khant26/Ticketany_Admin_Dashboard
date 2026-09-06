@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-function adminProfile() {
+function AdminProfile() {
   const tabRefs = useRef({});
   const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0 });
 
@@ -147,6 +147,7 @@ function adminProfile() {
         // optional
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load the profile datasets once on mount
   }, []);
 
   const usersById = useMemo(() => {
@@ -331,30 +332,8 @@ function adminProfile() {
       };
       return { customerId, email, ...c };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- helper functions are stable within this component render
   }, [orders, ticketsByOrder, users]);
-
-  // IDs tab rows: one row per ticket
-  const idRows = useMemo(() => {
-    const rows = [];
-    orders.forEach((o) => {
-      const oid = o?.id;
-      const ts = ticketsByOrder[oid] || [];
-      ts.forEach((t) => {
-        const eid = getOrderEventId(o) || getTicketEventId(t);
-        const ev = eventsById.get(eid);
-        rows.push({
-          orderId: oid,
-          eventName: ev?.event_name || ev?.name || "Event",
-          passportName: t?.passport_name || "—",
-          memberCode: t?.member_code || "—",
-          priorityDate: t?.priority_date || "",
-          price: getTicketPrice(t),
-          status: t?.status || "Pending",
-        });
-      });
-    });
-    return rows;
-  }, [orders, ticketsByOrder, eventsById]);
 
   // Events tab rows: grouped by event id
   const eventsAgg = useMemo(() => {
@@ -381,6 +360,7 @@ function adminProfile() {
       const name = ev?.event_name || ev?.name || `Event #${eid}`;
       return { eventId: Number(eid), eventName: name, rows };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- helper functions are stable within this component render
   }, [tickets, orders, eventsById]);
 
   const statusChip = (status) => {
@@ -646,4 +626,4 @@ function adminProfile() {
   );
 }
 
-export default adminProfile;
+export default AdminProfile;

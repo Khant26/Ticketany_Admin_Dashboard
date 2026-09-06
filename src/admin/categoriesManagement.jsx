@@ -41,16 +41,8 @@ function CategoriesManagement() {
 
   useEffect(() => {
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- categories are loaded once on mount
   }, []);
-
-  const toBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (err) => reject(err);
-    });
-  };
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
@@ -60,11 +52,11 @@ function CategoriesManagement() {
     if (!getToken()) return setError("Please login as admin to create categories");
 
     try {
-      setIsCreating(true);     
+      setIsCreating(true);
       // Use FormData with actual file (like events and banners)
       const formData = new FormData();
       formData.append('category_name', newCategoryName);
-      
+
       if (newCategoryImage) {
         formData.append('category_image', newCategoryImage);
       }

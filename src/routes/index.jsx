@@ -6,8 +6,8 @@ import EventUpload from "../admin/eventupload";
 import statuschange from "../admin/statuschange";
 import uploadbanner from "../admin/uploadbanner";
 import EditEvent from "../admin/EditEvent";
-import adminHome from "../admin/adminHome";
-import adminProfile from "../admin/adminProfile";
+import AdminHome from "../admin/adminHome";
+import AdminProfile from "../admin/adminProfile";
 import CategoriesManagement from "../admin/categoriesManagement";
 import addNewEvents from "../adminComponents/addNewEvents";
 import AllTickets from "../admin/AllTickets";
@@ -31,7 +31,7 @@ let router = createBrowserRouter([
     children: [
       {
         path: "/admin",
-        Component: adminHome,
+        Component: AdminHome,
       },
       {
         path: "/admin/eventupload",
@@ -55,7 +55,7 @@ let router = createBrowserRouter([
       },
       {
         path: "/admin/adminProfile",
-        Component: adminProfile,
+        Component: AdminProfile,
       },
       {
         path: "/admin/addNewEvents",

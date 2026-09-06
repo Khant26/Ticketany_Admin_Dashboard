@@ -1,4 +1,4 @@
-import { API_CONFIG, getApiUrl, buildEndpoint } from '../config/api';
+import { API_CONFIG, getApiUrl } from '../config/api';
 
 class ApiService {
     constructor() {
@@ -70,7 +70,7 @@ class ApiService {
 
         try {
             const response = await fetch(`${this.baseURL}${endpoint}`, config);
-            
+
             // If unauthorized, try to re-authenticate once
             if (response.status === 401) {
                 this.token = null;
@@ -89,14 +89,14 @@ class ApiService {
 
     async handleResponse(response) {
         const data = await response.json();
-        
+
         if (response.ok) {
             return { success: true, data };
         } else {
-            return { 
-                success: false, 
+            return {
+                success: false,
                 error: data.error || data.detail || data.message || 'Request failed',
-                status: response.status 
+                status: response.status
             };
         }
     }
@@ -106,9 +106,9 @@ class ApiService {
         try {
             const queryParams = new URLSearchParams(filters).toString();
             const endpoint = `/orders/${queryParams ? `?${queryParams}` : ''}`;
-            
+
             const result = await this.apiRequest(endpoint);
-            
+
             if (result.success) {
                 return { success: true, orders: result.data };
             } else {
@@ -124,7 +124,7 @@ class ApiService {
     async fetchOrderById(orderId) {
         try {
             const result = await this.apiRequest(`/orders/${orderId}/`);
-            
+
             if (result.success) {
                 return { success: true, order: result.data };
             } else {
@@ -141,9 +141,9 @@ class ApiService {
         try {
             const queryParams = new URLSearchParams(filters).toString();
             const endpoint = `/tickets/${queryParams ? `?${queryParams}` : ''}`;
-            
+
             const result = await this.apiRequest(endpoint);
-            
+
             if (result.success) {
                 return { success: true, tickets: result.data };
             } else {
@@ -159,7 +159,7 @@ class ApiService {
     async fetchTicketsByOrder(orderId) {
         try {
             const result = await this.apiRequest(`/orders/${orderId}/tickets/`);
-            
+
             if (result.success) {
                 return { success: true, tickets: result.data };
             } else {
@@ -175,7 +175,7 @@ class ApiService {
     async fetchUserOrders(userId) {
         try {
             const result = await this.apiRequest(`/users/${userId}/orders/`);
-            
+
             if (result.success) {
                 return { success: true, orders: result.data };
             } else {
@@ -194,7 +194,7 @@ class ApiService {
                 method: 'PATCH',
                 body: JSON.stringify({ status })
             });
-            
+
             if (result.success) {
                 return { success: true, order: result.data };
             } else {
@@ -213,7 +213,7 @@ class ApiService {
                 method: 'PATCH',
                 body: JSON.stringify({ status })
             });
-            
+
             if (result.success) {
                 return { success: true, ticket: result.data };
             } else {
@@ -229,7 +229,7 @@ class ApiService {
     async searchOrders(searchTerm) {
         try {
             const result = await this.apiRequest(`/orders/search/?q=${encodeURIComponent(searchTerm)}`);
-            
+
             if (result.success) {
                 return { success: true, orders: result.data };
             } else {
@@ -245,7 +245,7 @@ class ApiService {
     async getOrderStats() {
         try {
             const result = await this.apiRequest('/orders/stats/');
-            
+
             if (result.success) {
                 return { success: true, stats: result.data };
             } else {

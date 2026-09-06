@@ -79,6 +79,7 @@ function EditEvent() {
 
   useEffect(() => {
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- categories are loaded once when the editor opens
   }, []);
 
   useEffect(() => {
@@ -303,7 +304,7 @@ function EditEvent() {
     dragIndex.current = index;
     e.dataTransfer.effectAllowed = "move";
   };
-  const onDragOver = (index) => (e) => {
+  const onDragOver = () => (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -328,32 +329,6 @@ function EditEvent() {
     setExistingImages(nextExisting);
     setNewFiles(nextNew);
   };
-
-  const compressImage = (file, maxWidth = 1200, quality = 0.8) =>
-    new Promise((resolve) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else if (height > maxWidth) {
-          width = (width * maxWidth) / height;
-          height = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.fillStyle = "#FFF";
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-      img.src = URL.createObjectURL(file);
-    });
 
   const updateEvent = async () => {
     setLoading(true);
@@ -581,7 +556,7 @@ function EditEvent() {
           </button>
           <h2 className="text-2xl font-bold">Edit Event</h2>
         </div>
-        <div className="flex items-center gap-3"> 
+        <div className="flex items-center gap-3">
           <button
             onClick={toggleEventHide}
             disabled={toggling}

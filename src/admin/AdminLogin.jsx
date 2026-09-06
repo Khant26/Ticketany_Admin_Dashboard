@@ -62,7 +62,7 @@ function AdminLogin() {
             if (meRes.ok) {
               userInfo = await meRes.json();
             }
-          } catch (_) {
+          } catch {
             // ignore; fallback to existing payload
           }
         }
@@ -95,7 +95,7 @@ function AdminLogin() {
         setError(errorMsg);
         showError(errorMsg);
       }
-    } catch (err) {
+    } catch {
       const errorMsg = 'Network error. Please try again.';
       setError(errorMsg);
       showError(errorMsg);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-function eventupload() {
+function EventUpload() {
   // Form state for event data
   const [formData, setFormData] = useState({
     event_name: "",
@@ -29,7 +29,7 @@ function eventupload() {
 
   // Events display state
   const [events, setEvents] = useState([]);
-  const [fetchingEvents, setFetchingEvents] = useState(false);
+  const [, setFetchingEvents] = useState(false);
 
   // Categories state
   const [categories, setCategories] = useState([]);
@@ -37,6 +37,7 @@ function eventupload() {
   // Configuration constants
   const MAX_FILES = 10;
   const MAX_SIZE_MB = 5;
+  const IMAGE_SEPARATOR = "|||SEPARATOR|||";
   const API_BASE =
     import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/";
 
@@ -62,6 +63,7 @@ function eventupload() {
   useEffect(() => {
     fetchEvents();
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial event and category data load
   }, []);
 
   // Fetch categories from backend API
@@ -170,21 +172,6 @@ function eventupload() {
     setSelectedPrices(updatedPrices);
   };
 
-  // Truncate long file names for display
-  const truncateFileName = (fileName, maxLength = 30) => {
-    if (!fileName || fileName.length <= maxLength) return fileName;
-
-    const lastDot = fileName.lastIndexOf(".");
-    const extension = lastDot > -1 ? fileName.slice(lastDot) : "";
-    const base = lastDot > -1 ? fileName.slice(0, lastDot) : fileName;
-
-    const keep = Math.floor((maxLength - extension.length - 3) / 2);
-    const start = base.slice(0, keep);
-    const end = base.slice(-keep);
-
-    return `${start}...${end}${extension}`;
-  };
-
   // Handle file selection with validation and deduplication
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files || []);
@@ -268,61 +255,12 @@ function eventupload() {
     }
   };
 
-  // Format file size for display
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  };
-
-  // Compress image and convert to base64
-  const compressImage = (file, maxWidth = 1200, quality = 0.8) => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const img = new Image();
-
-      img.onload = () => {
-        // Calculate new dimensions while maintaining aspect ratio
-        let { width, height } = img;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxWidth) {
-            width = (width * maxWidth) / height;
-            height = maxWidth;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        // Fill with white background and draw image
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convert to base64 with compression
-        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-        resolve(compressedDataUrl);
-      };
-
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   // Drag and drop reorder (from AddNewEvents design)
   const handleDragStart = (index) => (e) => {
     dragIndex.current = index;
     e.dataTransfer.effectAllowed = "move";
   };
-  const handleDragOver = (index) => (e) => {
+  const handleDragOver = () => (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -346,11 +284,6 @@ function eventupload() {
     () => Math.max(6, previews.length || 0),
     [previews.length],
   );
-
-  // Convert empty strings to null for backend
-  const toNullIfEmpty = (value) => {
-    return value === "" ? null : value;
-  };
 
   // Main upload function
   const uploadEvent = async () => {
@@ -538,45 +471,6 @@ function eventupload() {
       setUploadStatus("❌ Network error: " + error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Delete event function
-  const deleteEvent = async (eventId) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) {
-      return;
-    }
-
-    const token = getToken();
-    if (!token) {
-      setUploadStatus("❌ Please login as admin to delete events");
-      navigate("/admin/login");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE}events/${eventId}/`, {
-        method: "DELETE",
-        headers: authHeaders(),
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        setUploadStatus(
-          "❌ Unauthorized/Forbidden (admin only). Please login again.",
-        );
-        navigate("/admin/login");
-        return;
-      }
-
-      if (response.ok) {
-        setUploadStatus("✅ Event deleted successfully");
-        fetchEvents(); // Refresh list
-      } else {
-        setUploadStatus("❌ Failed to delete event");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      setUploadStatus("❌ Error deleting event: " + error.message);
     }
   };
 
@@ -1030,4 +924,4 @@ function eventupload() {
   );
 }
 
-export default eventupload;
+export default EventUpload;

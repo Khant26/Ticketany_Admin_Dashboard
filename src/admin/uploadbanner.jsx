@@ -40,15 +40,8 @@ function UploadBanner() {
 
   useEffect(() => {
     fetchBanners();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- banners are loaded once on mount
   }, []);
-
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-    });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,16 +52,16 @@ function UploadBanner() {
 
     try {
       setIsUploading(true);
-      
+
       // Use FormData with actual file (like events)
       const formData = new FormData();
       formData.append('banner_name', title);
       formData.append('banner_image', selectedImage);
-      
+
       await axios.post(
         `${API_BASE}banners/`,
         formData,
-        { 
+        {
           headers: {
             ...authHeaders(),
             // Don't set Content-Type, let browser handle multipart/form-data
